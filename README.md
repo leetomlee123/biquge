@@ -1,17 +1,5 @@
 # 清阅
+基于flutter的小说阅读app
 
-A new Flutter project.
-2019年9月30日 14:44:06 第一版 阅读分页有较大缺陷
+- 2019年9月30日 14:44:06 第一版 阅读分页有较大缺陷
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
