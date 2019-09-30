@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:PureBook/common/LoadDialog.dart';
-import 'package:PureBook/common/util.dart';
 import 'package:PureBook/common/common.dart';
+import 'package:PureBook/common/util.dart';
 import 'package:PureBook/event/event.dart';
 import 'package:PureBook/view/Forgetpass.dart';
 import 'package:PureBook/view/Register.dart';
@@ -40,7 +40,7 @@ class _PersonCenter extends State<PersonCenter>
   Widget build(BuildContext context) {
     super.build(context);
     final logo = Hero(
-      tag: 'hero',
+      tag: 'God Group Ltcd',
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: 48.0,
@@ -49,9 +49,7 @@ class _PersonCenter extends State<PersonCenter>
     );
 
     final email = TextFormField(
-
       autofocus: false,
-      initialValue: username,
       decoration: InputDecoration(
         hintText: '账号',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -121,7 +119,7 @@ class _PersonCenter extends State<PersonCenter>
     final unmount = Padding(
       padding: EdgeInsets.all(8.0),
       child: new FlatButton(
-        highlightColor: Colors.grey,
+          highlightColor: Colors.grey,
           onPressed: () {
             SpUtil.remove('pwd');
             SpUtil.remove('username');
@@ -141,8 +139,10 @@ class _PersonCenter extends State<PersonCenter>
         '忘记密码?',
         style: TextStyle(color: Colors.black54),
       ),
-      onPressed: () {  Navigator.of(context).push(new MaterialPageRoute(
-          builder: (BuildContext context) => new ForgetPass()));},
+      onPressed: () {
+        Navigator.of(context).push(new MaterialPageRoute(
+            builder: (BuildContext context) => new ForgetPass()));
+      },
     );
     final loginUpLabel = FlatButton(
       child: Text(
@@ -182,11 +182,10 @@ class _PersonCenter extends State<PersonCenter>
         gradient: LinearGradient(colors: [
           Colors.white70,
           Colors.white70,
-
         ]),
       ),
       child: Column(
-        children: <Widget>[ welcome,Divider(), lorem,unmount],
+        children: <Widget>[welcome, Divider(), lorem, unmount],
       ),
     );
 
@@ -218,15 +217,15 @@ class _PersonCenter extends State<PersonCenter>
     try {
       response = await Util.dio.post(Common.login, data: formData);
     } catch (e) {
-
-      _globalKey.currentState.showSnackBar(new SnackBar(content: new Text('登陆异常,请重试...')));
+      _globalKey.currentState
+          .showSnackBar(new SnackBar(content: new Text('登陆异常,请重试...')));
     }
     Navigator.pop(context);
     Util.dio.interceptors.add(CookieManager(new CookieJar()));
     var data = jsonDecode(response.data)['data'];
     if (data['Status'] != 1) {
-      _globalKey.currentState.showSnackBar(new SnackBar(content: new Text(data['Message'])));
-
+      _globalKey.currentState
+          .showSnackBar(new SnackBar(content: new Text(data['Message'])));
     } else {
       SpUtil.putString('username', username);
       SpUtil.putString('pwd', pwd);

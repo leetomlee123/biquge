@@ -230,7 +230,17 @@ class _ReadBookState extends State<ReadBook> {
       if (content.startsWith('\n')) {
         content = content.substring(1);
       }
-      SpUtil.putString(id.toString(), content);
+      var start = 0;
+      List<String> temp = [];
+      var lens = content.length;
+      while (lens >= _bookTag.pageLen) {
+        temp.add(content.trim().substring(start, start + _bookTag.pageLen));
+        start += _bookTag.pageLen;
+        lens -= _bookTag.pageLen;
+      }
+
+      temp.add(content.substring(start, content.length));
+      SpUtil.putStringList(id.toString(), temp);
     }
   }
 

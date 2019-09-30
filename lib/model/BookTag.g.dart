@@ -18,11 +18,19 @@ BookTag _$BookTagFromJson(Map<String, dynamic> json) {
           ?.toList(),
       json['name'] as String,
       (json['contents'] as List)?.map((e) => e as String)?.toList())
+    ..pageOffsets = (json['pageOffsets'] as List)
+        ?.map((e) => (e as Map<String, dynamic>)?.map(
+              (k, e) => MapEntry(k, e as int),
+            ))
+        ?.toList()
+    ..content = json['content'] as String
     ..pageLen = json['pageLen'] as int
     ..fontSize = (json['fontSize'] as num)?.toDouble();
 }
 
 Map<String, dynamic> _$BookTagToJson(BookTag instance) => <String, dynamic>{
+      'pageOffsets': instance.pageOffsets,
+      'content': instance.content,
       'pageLen': instance.pageLen,
       'fontSize': instance.fontSize,
       'name': instance.name,

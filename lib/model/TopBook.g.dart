@@ -14,7 +14,7 @@ TopBooks _$TopBooksFromJson(Map<String, dynamic> json) {
       json['Img'] as String,
       json['Desc'] as String,
       json['CName'] as String,
-      json['Score'] as double);
+      (json['Score'] as num)?.toDouble());
 }
 
 Map<String, dynamic> _$TopBooksToJson(TopBooks instance) => <String, dynamic>{

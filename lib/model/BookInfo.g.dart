@@ -22,7 +22,11 @@ BookInfo _$BookInfoFromJson(Map<String, dynamic> json) {
       json['LastChapterId'] as int,
       json['LastChapter'] as String,
       json['FirstChapterId'] as int,
-      json['LastTime'] as String);
+      json['LastTime'] as String,
+      (json['SameUserBooks'] as List)
+          ?.map((e) =>
+              e == null ? null : Book.fromJson(e as Map<String, dynamic>))
+          ?.toList());
 }
 
 Map<String, dynamic> _$BookInfoToJson(BookInfo instance) => <String, dynamic>{
@@ -38,5 +42,6 @@ Map<String, dynamic> _$BookInfoToJson(BookInfo instance) => <String, dynamic>{
       'LastChapterId': instance.LastChapterId,
       'LastChapter': instance.LastChapter,
       'FirstChapterId': instance.FirstChapterId,
-      'LastTime': instance.LastTime
+      'LastTime': instance.LastTime,
+      'SameCategoryBooks': instance.SameUserBooks
     };
