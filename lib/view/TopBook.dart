@@ -57,178 +57,181 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     // TODO: implement build
-    return new Container(
-      child: new Column(
-        children: <Widget>[
-          new Row(
-            children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
-          ),
-          new Row(
-            children: getBtnGroup(lv2, idx2, 1, ['推荐', '完结', '收藏', '新书']),
-          ),
-          new Row(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
-          Expanded(
-              child: ListView.builder(
-            controller: _scrollController,
-            itemBuilder: (context, i) {
-              var auth = items[i].Author;
-              var cate = items[i].CName;
-              if (i == items.length) {
-                return _buildProgressIndicator();
-              } else {
-                return new GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  child: new Row(
-                    children: <Widget>[
-                      new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          new Container(
-                            padding:
-                                const EdgeInsets.only(left: 10.0, top: 10.0),
-                            child: new Image.network(
-                              Common.imgPre + items[i].Img,
-                              height: 100,
-                              width: 80,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        ],
-                      ),
-                      new Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        verticalDirection: VerticalDirection.down,
-                        // textDirection:,
-                        textBaseline: TextBaseline.alphabetic,
 
-                        children: <Widget>[
-                          Container(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Row(
+          children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
+        ),
+        Row(
+          children: getBtnGroup(lv2, idx2, 1, ['推荐', '完结', '收藏', '新书']),
+        ),
+        Row(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
+        Expanded(
+            child: ListView.builder(
+          controller: _scrollController,
+          itemBuilder: (context, i) {
+            var auth = items[i].Author;
+            var cate = items[i].CName;
+            if (i == items.length) {
+              return _buildProgressIndicator();
+            } else {
+              return new GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  verticalDirection: VerticalDirection.up,
+                  children: <Widget>[
+                    new Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        new Container(
+                          padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                          child: new Image.network(
+                            Common.imgPre + items[i].Img,
+                            height: 100,
+                            width: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      ],
+                    ),
+                    new Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      verticalDirection: VerticalDirection.down,
+                      // textDirection:,
+                      textBaseline: TextBaseline.alphabetic,
+
+                      children: <Widget>[
+                        Container(
                             padding:
                                 const EdgeInsets.only(left: 10.0, top: 10.0),
-                            child: new Text(
-                              items[i].Name,
-                              style: TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          Container(
-                            padding:
-                                const EdgeInsets.only(left: 10.0, top: 10.0),
-                            child: new Text('$cate | $auth',
-                                style: TextStyle(
-                                    fontSize: 14, color: Colors.grey)),
-                          ),
-                          Container(
-                            padding:
-                                const EdgeInsets.only(left: 10.0, top: 10.0),
-                            child: new Text(items[i].Desc,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                style: TextStyle(
-                                    fontSize: 12, color: Colors.grey)),
-                            width: 270,
-                          ),
-                        ],
-                      ),
-                      new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          new Text(
-                            items[i].Score.toString(),
-                            style: TextStyle(
-                                color: Colors.amberAccent, fontSize: 13.0),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  onTap: () async {
-                    String url =
-                        'https://shuapi.jiaston.com/info/${items[i].Id}.html';
-                    showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) {
-                          return new LoadingDialog(
-                            text: "加载中…",
-                          );
-                        });
-                    Response future = await Util.dio.get(url);
-                    Navigator.pop(context);
-                    var data = jsonDecode(future.data)['data'];
-                    BookInfo bookInfo = new BookInfo.fromJson(data);
-                    Navigator.of(context).push(new MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            new BookDetail(bookInfo)));
-                  },
-                );
-              }
-            },
-            itemCount: items.length,
-          ))
-        ],
-      ),
+                            child: Row(
+                              children: <Widget>[
+                                Text(
+                                  items[i].Name,
+                                  style: TextStyle(fontSize: 15),
+                                ),
+                              ],
+                            )),
+                        Container(
+                          padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                          child: new Text('$cate | $auth',
+                              style:
+                                  TextStyle(fontSize: 14, color: Colors.grey)),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                          child: new Text(items[i].Desc,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.grey)),
+                          width: 270,
+                        ),
+                      ],
+                    ),
+                    new Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          items[i].Score.toString(),
+                          style: TextStyle(fontSize: 15, color: Colors.yellow),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+                onTap: () async {
+                  String url =
+                      'https://shuapi.jiaston.com/info/${items[i].Id}.html';
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return new LoadingDialog(
+                          text: "加载中…",
+                        );
+                      });
+                  Response future = await Util.dio.get(url);
+                  Navigator.pop(context);
+                  var data = jsonDecode(future.data)['data'];
+                  BookInfo bookInfo = new BookInfo.fromJson(data);
+                  Navigator.of(context).push(new MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          new BookDetail(bookInfo)));
+                },
+              );
+            }
+          },
+          itemCount: items.length,
+        ))
+      ],
     );
   }
 
   getBtnGroup(leve, idx, who, List<String> names) {
     List<Widget> btns = [];
     for (var i = 0; i < names.length; i++) {
-      btns.add(new Padding(
-        padding: const EdgeInsets.only(left: 5.0),
-        child: new FlatButton(
-            colorBrightness: Brightness.dark,
-            textColor: Colors.black,
-            highlightColor: Colors.grey,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0)),
+      btns.add(Padding(
+        child: InkWell(
+          child: Container(child: Center(child: Text(
+            names[i],
+          ),), width: 60,
+            height: 30,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
             color: leve && i == idx ? Colors.grey : Colors.white,
-            onPressed: () {
-              setState(() {
-                switch (who) {
-                  case 0:
-                    {
-                      setState(() {
-                        idx1 = i;
-                        items = [];
-                        isPerformingRequest = false;
-                        hasNext = true;
-                        page = 1;
-                        getTop();
-                      });
-                    }
-                    break;
-                  case 1:
-                    {
-                      setState(() {
-                        idx2 = i;
-                        items = [];
-                        isPerformingRequest = false;
-                        hasNext = true;
-                        page = 1;
-                        getTop();
-                      });
-                    }
-                    break;
-                  case 2:
-                    {
-                      setState(() {
-                        idx3 = i;
-                        items = [];
-                        isPerformingRequest = false;
-                        hasNext = true;
-                        page = 1;
-                        getTop();
-                      });
-                    }
-                    break;
-                }
-              });
-            },
-            child: new Text(names[i])),
+            ),),
+          onTap: () {
+            setState(() {
+              switch (who) {
+                case 0:
+                  {
+                    setState(() {
+                      idx1 = i;
+                      items = [];
+                      isPerformingRequest = false;
+                      hasNext = true;
+                      page = 1;
+                      getTop();
+                    });
+                  }
+                  break;
+                case 1:
+                  {
+                    setState(() {
+                      idx2 = i;
+                      items = [];
+                      isPerformingRequest = false;
+                      hasNext = true;
+                      page = 1;
+                      getTop();
+                    });
+                  }
+                  break;
+                case 2:
+                  {
+                    setState(() {
+                      idx3 = i;
+                      items = [];
+                      isPerformingRequest = false;
+                      hasNext = true;
+                      page = 1;
+                      getTop();
+                    });
+                  }
+                  break;
+              }
+            });
+          },
+        ),
+        padding: EdgeInsets.only(left: 8.0,right: 8.0,bottom: 8.0),
       ));
+
     }
     return btns;
   }
