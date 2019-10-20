@@ -68,7 +68,10 @@ class _BookShelfState extends State<BookShelf>
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color,
+          color: Store.value<AppThemeModel>(context)
+              .getThemeData()
+              .iconTheme
+              .color,
           icon: ImageIcon(
             AssetImage("images/account.png"),
           ),
@@ -80,13 +83,21 @@ class _BookShelfState extends State<BookShelf>
         elevation: 0,
         title: Text(
           '书架',
-          style: TextStyle(fontSize: 18, color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color),
+          style: TextStyle(
+              fontSize: 18,
+              color: Store.value<AppThemeModel>(context)
+                  .getThemeData()
+                  .iconTheme
+                  .color),
         ),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
               icon: Icon(Icons.search),
-              color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color,
+              color: Store.value<AppThemeModel>(context)
+                  .getThemeData()
+                  .iconTheme
+                  .color,
               tooltip: '搜索小说',
               onPressed: () {
                 myshowSearch(context: context, delegate: SearchBarDelegate());
@@ -139,6 +150,15 @@ class _BookShelfState extends State<BookShelf>
 
 //刷新书架
   freshShelf() async {
+    if (SpUtil.haveKey('login')) {
+      FormData formData = new FormData.fromMap({
+        "password": SpUtil.getString('pwd'),
+        "username": SpUtil.getString('username'),
+        "usecookie": 43200,
+        "action": "login",
+      });
+      Util(null).http().post(Common.login, data: formData);
+    }
     //网络请求
     Response response2 =
         await Util(null).http().get(Common.domain + "/Bookshelf.aspx");
@@ -210,7 +230,7 @@ class _BookShelfState extends State<BookShelf>
                   padding: const EdgeInsets.only(left: 10.0, top: 10.0),
                   child: Text(
                     item.Name,
-                    style: TextStyle( fontSize: 16.0),
+                    style: TextStyle(fontSize: 16.0),
                   ),
                 ),
                 Container(
@@ -358,12 +378,19 @@ class _BookShelfState extends State<BookShelf>
     //网络请求
     Response response2 =
         await Util(context).http().get(Common.domain + "/Bookshelf.aspx");
-
     List decode = json.decode(response2.data)['data'];
-    books = decode.map((m) => new Book.fromJson(m)).toList();
-    setState(() {
-      dataSource.insertAll(dataSource.length, books);
+    books = decode.map((m) =>  Book.fromJson(m)).toList();
+    var ids = dataSource.map((f)=>f.Id).toList();
+    books.forEach((f){
+      if(!ids.contains(f.Id)){
+        dataSource.insert(dataSource.length, f);
+      }
     });
+ if(mounted){
+   setState(() {
+
+   });
+ }
     SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
   }
 }

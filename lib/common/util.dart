@@ -74,13 +74,13 @@ class Util {
 void delLocalCache(List<String> ids){
 
     ids.forEach((f){
+      if(SpUtil.haveKey(f)){
       BookTag _bookTag=BookTag.fromJson(jsonDecode(SpUtil.getString(f)));
       for(var value in _bookTag.chapters){
         SpUtil.remove(value.id.toString());
         SpUtil.remove('pages${value.id.toString()}');
       }
-      SpUtil.remove(f);
+      SpUtil.remove(f);}
     });
-    Toast.show('退出登陆');
 }
 }

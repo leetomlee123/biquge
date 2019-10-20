@@ -263,7 +263,10 @@ class _BookDetailState extends State<BookDetail>
                                     child: Text(
                                       _bookInfo.SameUserBooks[i].Name,
                                       style: TextStyle(
-                                          color: Colors.black, fontSize: 18.0),
+                                          color: Store.value<AppThemeModel>(context)
+                                              .getThemeData()
+                                              .iconTheme
+                                              .color, fontSize: 18.0),
                                     )),
                                 Container(
                                   padding: const EdgeInsets.only(

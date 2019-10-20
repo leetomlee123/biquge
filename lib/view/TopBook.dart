@@ -7,6 +7,7 @@ import 'package:PureBook/entity/TopBook.dart';
 import 'package:PureBook/entity/TopResult.dart';
 import 'package:PureBook/model/ThemeModel.dart';
 import 'package:PureBook/store/Store.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
@@ -79,7 +80,11 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
         centerTitle: true,
         title: Text(
           '排行榜',
-          style: TextStyle(color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color ),
+          style: TextStyle(
+              color: Store.value<AppThemeModel>(context)
+                  .getThemeData()
+                  .iconTheme
+                  .color),
         ),
       ),
       body: Column(
@@ -133,8 +138,8 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                             Container(
                               padding:
                                   const EdgeInsets.only(left: 10.0, top: 10.0),
-                              child: new Image.network(
-                                Common.imgPre + items[i].Img,
+                              child: CachedNetworkImage(
+                                imageUrl: Common.imgPre + items[i].Img,
                                 height: 100,
                                 width: 80,
                                 fit: BoxFit.cover,
@@ -233,7 +238,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
             height: 30,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: leve && i == idx ? Colors.blue : Store.value<AppThemeModel>(context).getThemeData().unselectedWidgetColor,
+              color: leve && i == idx ? Colors.blue : Colors.transparent,
             ),
           ),
           onTap: () {

@@ -499,10 +499,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: 0,
-          backgroundColor: theme.primaryColor,
-          iconTheme: theme.primaryIconTheme,
-          textTheme: theme.primaryTextTheme,
-          brightness: theme.primaryColorBrightness,
+
           leading: widget.delegate.buildLeading(context),
           title: TextField(
             controller: widget.delegate._queryTextController,
