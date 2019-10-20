@@ -1,37 +1,42 @@
+import 'dart:io';
+
+import 'package:PureBook/entity/Book.dart';
+import 'package:PureBook/model/ThemeModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/BookShelf.dart';
 import 'package:PureBook/view/PersonCenter.dart';
-import 'package:PureBook/view/Search.dart';
 import 'package:PureBook/view/TopBook.dart';
-import 'package:PureBook/view/Video.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'event/event.dart';
-import 'model/Book.dart';
 
-Widget bodyWidget;
 List<Book> books = [];
 
 void main() async {
   await SpUtil.getInstance();
-
-  runApp(MyApp());
-  SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(
-    statusBarIconBrightness: Brightness.dark,
-    statusBarColor: Colors.transparent,
-  );
-  SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+  await DirectoryUtil.getInstance();
+  FirebaseAdMob.instance
+      .initialize(appId: "ca-app-pub-6006602100377888~4888848498");
+  runApp(Store.init(child: MyApp()));
+  if (Platform.isAndroid) {
+    SystemUiOverlayStyle systemUiOverlayStyle =
+        SystemUiOverlayStyle(statusBarColor: Colors.transparent);
+    SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+  }
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new MaterialApp(
+
+    return MaterialApp(
       title: '清阅揽胜',
-      theme: ThemeData.light(),
-      home: new MainPage(),
+      theme: Store.value<AppThemeModel>(context).getThemeData(),
+      home: MainPage(),
     );
   }
 }
@@ -43,7 +48,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _tabIndex = 0;
-  var appBarTitles = {0: "书架", 1: "排行榜",2:'影音揽胜'};
+
   var _pageController = PageController();
   List<BottomNavigationBarItem> bottoms = [
     BottomNavigationBarItem(
@@ -60,22 +65,7 @@ class _MainPageState extends State<MainPage> {
         title: new Text(
           '排行榜',
         )),
-    BottomNavigationBarItem(
-        icon: ImageIcon(
-          AssetImage("images/video.png"),
-        ),
-        title: new Text(
-          '影音揽胜',
-        )),
   ];
-
-  Text getTabTitle(int curIndex) {
-    if (curIndex == _tabIndex) {
-      return new Text(appBarTitles[curIndex]);
-    } else {
-      return new Text(appBarTitles[curIndex]);
-    }
-  }
 
   /*
    * 存储的四个页面，和Fragment一样
@@ -83,54 +73,16 @@ class _MainPageState extends State<MainPage> {
   var _pages = [
     new BookShelf(),
     new TopBook(),
-    new Video()
   ];
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: new Drawer(
+      drawer: Drawer(
         child: PersonCenter(),
       ),
       key: _scaffoldKey,
-      appBar: new AppBar(
-        leading: _tabIndex == 0?new IconButton(
-          color: Colors.black,
-          icon: ImageIcon(
-            AssetImage("images/account.png"),
-          ),
-          onPressed: () {
-            _scaffoldKey.currentState.openDrawer();
-          },
-        ):null,
-        backgroundColor: Color.fromARGB(1, 245, 245, 245),
-        elevation: 0,
-        title: new Text(
-          appBarTitles[_tabIndex],
-          style: TextStyle(fontSize: 18, color: Colors.black),
-        ),
-        centerTitle: true,
-        actions: _tabIndex == 0
-            ? <Widget>[
-                IconButton(
-                    icon: Icon(Icons.search),
-                    color: Colors.black,
-                    tooltip: '搜索小说',
-                    onPressed: () {
-                      showSearch(
-                          context: context, delegate: SearchBarDelegate());
-                    }),
-                IconButton(
-                    icon: Icon(Icons.add),
-                    color: Colors.black,
-                    tooltip: '添加',
-                    onPressed: () {
-                      // do nothing
-                    }),
-              ]
-            : [],
-      ),
       body: SafeArea(
         child: PageView.builder(
             //要点1
@@ -142,7 +94,7 @@ class _MainPageState extends State<MainPage> {
             itemCount: _pages.length,
             itemBuilder: (context, index) => _pages[index]),
       ),
-      bottomNavigationBar: new BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         items: bottoms,
         type: BottomNavigationBarType.fixed,
         currentIndex: _tabIndex,
@@ -163,6 +115,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     // TODO: implement initState
     eventBus.on<BooksEvent>().listen((BooksEvent booksEvent) => closeDrawer());
+    eventBus.on<OpenEvent>().listen((OpenEvent openEvent) => openDrawer());
     eventBus
         .on<SyncShelfEvent>()
         .listen((SyncShelfEvent booksEvent) => closeDrawer());
@@ -170,5 +123,9 @@ class _MainPageState extends State<MainPage> {
 
   closeDrawer() {
     _scaffoldKey.currentState.openEndDrawer();
+  }
+
+  openDrawer() {
+    _scaffoldKey.currentState.openDrawer();
   }
 }

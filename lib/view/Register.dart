@@ -1,12 +1,8 @@
 import 'dart:convert';
 
-import 'package:PureBook/common/LoadDialog.dart';
-import 'package:PureBook/common/util.dart';
 import 'package:PureBook/common/common.dart';
-import 'package:PureBook/event/event.dart';
-import 'package:PureBook/util/EventBus.dart';
+import 'package:PureBook/common/util.dart';
 import 'package:dio/dio.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
@@ -28,13 +24,14 @@ class _RegisterState extends State<Register> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
-        title: Text('账号注册',style: TextStyle(color: Colors.black),),
+        title: Text(
+          '账号注册',
+          style: TextStyle(color: Colors.black),
+        ),
         centerTitle: true,
       ),
       key: _scaffoldkey,
-      backgroundColor: Colors.white,
       body: new Container(
         alignment: Alignment.center,
         child: new ListView(
@@ -47,8 +44,8 @@ class _RegisterState extends State<Register> {
               decoration: InputDecoration(
                 hintText: '账号',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 this.name = value;
@@ -61,8 +58,8 @@ class _RegisterState extends State<Register> {
               decoration: InputDecoration(
                 hintText: '密码',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 pwd = value;
@@ -75,8 +72,8 @@ class _RegisterState extends State<Register> {
               decoration: InputDecoration(
                 hintText: '重复密码',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 repassword = value;
@@ -85,12 +82,12 @@ class _RegisterState extends State<Register> {
             SizedBox(height: 8.0),
             TextFormField(
               keyboardType: TextInputType.emailAddress,
-   autofocus: false,
+              autofocus: false,
               decoration: InputDecoration(
                 hintText: '邮箱 找回密码的唯一凭证,请谨慎输入...',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 email = value;
@@ -130,29 +127,21 @@ class _RegisterState extends State<Register> {
         "action": "newuser",
       });
 
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return new LoadingDialog(
-              text: "注册中…",
-            );
-          });
       Response response;
       try {
-        response = await Util.dio
+        response = await Util(context)
+            .http()
             .post(Common.domain + '/register.aspx', data: formData);
       } catch (e) {
         _scaffoldkey.currentState
-            .showSnackBar(new SnackBar(content: new Text('登陆异常,请重试...')));
+            .showSnackBar(new SnackBar(content: new Text('注册异常,请重试...')));
       }
-      Navigator.pop(context);
+
       var data = jsonDecode(response.data)['data'];
       if (data['Status'] != 1) {
         _scaffoldkey.currentState
             .showSnackBar(new SnackBar(content: new Text(data['Message'])));
       } else {
-
         Navigator.pop(context);
       }
     } else {

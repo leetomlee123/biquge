@@ -1,15 +1,15 @@
 
 class Common {
   static String imgPre = "https://imgapi.xllxdg.com/BookFiles/BookImages/";
-  static String domain = "https://shuapi.jiaston.com";
+  static String domain = "https://dynic.hzwip.com";
 
-  static String login = "https://shuapi.jiaston.com/Login.aspx";
+  static String login = domain+"/Login.aspx";
   static String listbookname = "booklist";
   static String toplist = "toplist";
-  static String bookInfo = "https://shuapi.jiaston.com/info/";
-  static String chaptersUrl = "https://shuapi.jiaston.com/book/";
-  static String bookContentUrl = 'https://shuapi.jiaston.com/book/';
-  static String bookAction = 'https://shuapi.jiaston.com/BookAction.aspx';
+  static String bookInfo = domain+"/info/";
+  static String chaptersUrl = domain+"/book/";
+  static String bookContentUrl = domain+'/book/';
+  static String bookAction = domain+'/BookAction.aspx';
 }
 
 

@@ -1,4 +1,4 @@
-import 'package:PureBook/model/Book.dart';
+import 'package:PureBook/entity/Book.dart';
 import 'package:event_bus/event_bus.dart';
 
 EventBus eventBus = new EventBus();
@@ -9,6 +9,16 @@ class RegisterEvent {
   String name;
 
   RegisterEvent(this.name);
+}
+class OpenEvent {
+  String name;
+
+  OpenEvent(this.name);
+}
+class PageEvent {
+  int page;
+
+  PageEvent(this.page);
 }
 
 class SyncShelfEvent {

@@ -1,15 +1,17 @@
 import 'dart:convert';
 
-import 'package:PureBook/common/LoadDialog.dart';
 import 'package:PureBook/common/common.dart';
 import 'package:PureBook/common/util.dart';
-import 'package:PureBook/model/BookInfo.dart';
-import 'package:PureBook/model/TopBook.dart';
-import 'package:PureBook/model/TopResult.dart';
+import 'package:PureBook/entity/BookInfo.dart';
+import 'package:PureBook/entity/TopBook.dart';
+import 'package:PureBook/entity/TopResult.dart';
+import 'package:PureBook/model/ThemeModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'BookDetail.dart';
 
@@ -31,146 +33,189 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
   int idx1 = 0;
   int idx2 = 0;
   int idx3 = 0;
+  Widget body;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   List<TopBooks> items = [];
   TopResult topResult;
   int page = 1;
-  bool hasNext = true;
-  ScrollController _scrollController = new ScrollController();
-  bool isPerformingRequest = false; // 是否有请求正在进行
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        getTop();
-      }
-    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       /// 接口请求
       initUi();
     });
   }
 
+  void _onRefresh() async {
+    items = [];
+    page = 1;
+    getTop();
+    if (mounted) {
+      setState(() {});
+    }
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    page += 1;
+    getTop();
+    if (mounted) setState(() {});
+    _refreshController.loadComplete();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // TODO: implement build
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Row(
-          children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Color.fromARGB(1, 245, 245, 245),
+        centerTitle: true,
+        title: Text(
+          '排行榜',
+          style: TextStyle(color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color ),
         ),
-        Row(
-          children: getBtnGroup(lv2, idx2, 1, ['推荐', '完结', '收藏', '新书']),
-        ),
-        Row(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
-        Expanded(
-            child: ListView.builder(
-          controller: _scrollController,
-          itemBuilder: (context, i) {
-            var auth = items[i].Author;
-            var cate = items[i].CName;
-            if (i == items.length) {
-              return _buildProgressIndicator();
-            } else {
-              return new GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  verticalDirection: VerticalDirection.up,
-                  children: <Widget>[
-                    new Column(
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          Row(
+            children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
+          ),
+          Row(
+            children: getBtnGroup(lv2, idx2, 1, ['推荐', '完结', '收藏', '新书']),
+          ),
+          Row(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
+          Expanded(
+            child: SmartRefresher(
+              enablePullDown: true,
+              enablePullUp: true,
+              header: WaterDropHeader(),
+              footer: CustomFooter(
+                builder: (BuildContext context, LoadStatus mode) {
+                  if (mode == LoadStatus.idle) {
+                  } else if (mode == LoadStatus.loading) {
+                    body = CupertinoActivityIndicator();
+                  } else if (mode == LoadStatus.failed) {
+                    body = Text("加载失败！点击重试！");
+                  } else if (mode == LoadStatus.canLoading) {
+                    body = Text("松手,加载更多!");
+                  } else {
+                    body = Text("到底了!");
+                  }
+                  return Center(
+                    child: body,
+                  );
+                },
+              ),
+              controller: _refreshController,
+              onRefresh: _onRefresh,
+              onLoading: _onLoading,
+              child: ListView.builder(
+                itemBuilder: (context, i) {
+                  var auth = items[i].Author;
+                  var cate = items[i].CName;
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
+                      verticalDirection: VerticalDirection.up,
                       children: <Widget>[
-                        new Container(
-                          padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                          child: new Image.network(
-                            Common.imgPre + items[i].Img,
-                            height: 100,
-                            width: 80,
-                            fit: BoxFit.cover,
-                          ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              padding:
+                                  const EdgeInsets.only(left: 10.0, top: 10.0),
+                              child: new Image.network(
+                                Common.imgPre + items[i].Img,
+                                height: 100,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          verticalDirection: VerticalDirection.down,
+                          // textDirection:,
+                          textBaseline: TextBaseline.alphabetic,
+
+                          children: <Widget>[
+                            Container(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, top: 10.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Text(
+                                      items[i].Name,
+                                      style: TextStyle(fontSize: 15),
+                                    ),
+                                  ],
+                                )),
+                            Container(
+                              padding:
+                                  const EdgeInsets.only(left: 10.0, top: 10.0),
+                              child: new Text('$cate | $auth',
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.grey)),
+                            ),
+                            Container(
+                              padding:
+                                  const EdgeInsets.only(left: 10.0, top: 10.0),
+                              child: new Text(items[i].Desc,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey)),
+                              width: 270,
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              items[i].Score.toString(),
+                              style:
+                                  TextStyle(fontSize: 15, color: Colors.blue),
+                            ),
+                          ],
                         )
                       ],
                     ),
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      verticalDirection: VerticalDirection.down,
-                      // textDirection:,
-                      textBaseline: TextBaseline.alphabetic,
+                    onTap: () async {
+                      String url =
+                          'https://shuapi.jiaston.com/info/${items[i].Id}.html';
 
-                      children: <Widget>[
-                        Container(
-                            padding:
-                                const EdgeInsets.only(left: 10.0, top: 10.0),
-                            child: Row(
-                              children: <Widget>[
-                                Text(
-                                  items[i].Name,
-                                  style: TextStyle(fontSize: 15),
-                                ),
-                              ],
-                            )),
-                        Container(
-                          padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                          child: new Text('$cate | $auth',
-                              style:
-                                  TextStyle(fontSize: 14, color: Colors.grey)),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                          child: new Text(items[i].Desc,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.grey)),
-                          width: 270,
-                        ),
-                      ],
-                    ),
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          items[i].Score.toString(),
-                          style: TextStyle(fontSize: 15, color: Colors.yellow),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                onTap: () async {
-                  String url =
-                      'https://shuapi.jiaston.com/info/${items[i].Id}.html';
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return new LoadingDialog(
-                          text: "加载中…",
-                        );
-                      });
-                  Response future = await Util.dio.get(url);
-                  Navigator.pop(context);
-                  var data = jsonDecode(future.data)['data'];
-                  BookInfo bookInfo = new BookInfo.fromJson(data);
-                  Navigator.of(context).push(new MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          new BookDetail(bookInfo)));
+                      Response future = await Util(context).http().get(url);
+
+                      var data = jsonDecode(future.data)['data'];
+                      BookInfo bookInfo = new BookInfo.fromJson(data);
+                      Navigator.of(context).push(new MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              new BookDetail(bookInfo)));
+                    },
+                  );
                 },
-              );
-            }
-          },
-          itemCount: items.length,
-        ))
-      ],
+                itemCount: items.length,
+              ),
+            ),
+          )
+        ],
+      ),
     );
+
+    // TODO: implement build
   }
 
   getBtnGroup(leve, idx, who, List<String> names) {
@@ -178,14 +223,19 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
     for (var i = 0; i < names.length; i++) {
       btns.add(Padding(
         child: InkWell(
-          child: Container(child: Center(child: Text(
-            names[i],
-          ),), width: 60,
+          child: Container(
+            child: Center(
+              child: Text(
+                names[i],
+              ),
+            ),
+            width: 60,
             height: 30,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-            color: leve && i == idx ? Colors.grey : Colors.white,
-            ),),
+              borderRadius: BorderRadius.circular(20),
+              color: leve && i == idx ? Colors.blue : Store.value<AppThemeModel>(context).getThemeData().unselectedWidgetColor,
+            ),
+          ),
           onTap: () {
             setState(() {
               switch (who) {
@@ -194,8 +244,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                     setState(() {
                       idx1 = i;
                       items = [];
-                      isPerformingRequest = false;
-                      hasNext = true;
+                      _refreshController.resetNoData();
                       page = 1;
                       getTop();
                     });
@@ -206,8 +255,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                     setState(() {
                       idx2 = i;
                       items = [];
-                      isPerformingRequest = false;
-                      hasNext = true;
+                      _refreshController.resetNoData();
                       page = 1;
                       getTop();
                     });
@@ -218,8 +266,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                     setState(() {
                       idx3 = i;
                       items = [];
-                      isPerformingRequest = false;
-                      hasNext = true;
+                      _refreshController.resetNoData();
                       page = 1;
                       getTop();
                     });
@@ -229,69 +276,31 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
             });
           },
         ),
-        padding: EdgeInsets.only(left: 8.0,right: 8.0,bottom: 8.0),
+        padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
       ));
-
     }
     return btns;
   }
 
   getTop() async {
-    if (hasNext) {
-      if (!isPerformingRequest) {
-        // 判断是否有请求正在执行
-        setState(() {
-          isPerformingRequest = true;
-          page += 1;
-        });
-        String url =
-            '${Common.domain}/top/${word1[idx1]}/top/${word2[idx2]}/${word3[idx3]}/$page.html';
-        showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return new LoadingDialog(
-                text: "加载中…",
-              );
-            });
-        Response res = await Util.dio.get(url);
-        Navigator.pop(context);
-        setState(() {
-          topResult = new TopResult.fromJson(jsonDecode(res.data)['data']);
+    String url =
+        '${Common.domain}/top/${word1[idx1]}/top/${word2[idx2]}/${word3[idx3]}/$page.html';
+    Response res = await Util(null).http().get(url);
 
-          items.addAll(topResult.BookList);
-          isPerformingRequest = false;
-          hasNext = topResult.HasNext;
-        });
-      }
-    } else {
-      double edge = 50.0;
-      double offsetFromBottom = _scrollController.position.maxScrollExtent -
-          _scrollController.position.pixels;
-      if (offsetFromBottom < edge) {
-        _scrollController.animateTo(
-            _scrollController.offset - (edge - offsetFromBottom),
-            duration: new Duration(milliseconds: 500),
-            curve: Curves.easeOut);
-      }
+    topResult = new TopResult.fromJson(jsonDecode(res.data)['data']);
+
+    items.addAll(topResult.BookList);
+    if (!topResult.HasNext) {
+      _refreshController.loadNoData();
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
-
-  Widget _buildProgressIndicator() {
-    return new Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: new Center(
-        child: new Opacity(
-          opacity: isPerformingRequest ? 1.0 : 0.0,
-          child: new CircularProgressIndicator(),
-        ),
-      ),
-    );
-  }
 
   Future initUi() async {
     bool exist = SpUtil.haveKey(Common.toplist);
@@ -304,20 +313,12 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
     }
     String url =
         '${Common.domain}/top/${word1[0]}/top/${word2[0]}/${word3[0]}/$page.html';
+    var _context = null;
     if (!exist) {
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return new LoadingDialog(
-              text: "加载中…",
-            );
-          });
+      _context = context;
     }
-    Response res = await Util.dio.get(url);
-    if (!exist) {
-      Navigator.pop(context);
-    }
+    Response res = await Util(_context).http().get(url);
+
     topResult = new TopResult.fromJson(jsonDecode(res.data)['data']);
     if (exist) {
       SpUtil.remove(Common.toplist);

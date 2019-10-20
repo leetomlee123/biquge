@@ -1,21 +1,23 @@
 import 'dart:convert';
 
-import 'package:PureBook/action/BookAction.dart';
-import 'package:PureBook/common/LoadDialog.dart';
 import 'package:PureBook/common/common.dart';
 import 'package:PureBook/common/toast.dart';
 import 'package:PureBook/common/util.dart';
+import 'package:PureBook/entity/Book.dart';
+import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/event/event.dart';
 import 'package:PureBook/main.dart';
-import 'package:PureBook/model/Book.dart';
-import 'package:PureBook/model/BookInfo.dart';
-import 'package:PureBook/model/BookTag.dart';
+import 'package:PureBook/model/ThemeModel.dart';
+import 'package:PureBook/store/Store.dart';
+import 'package:PureBook/view/MySearchDelegate.dart';
 import 'package:PureBook/view/ReadBook.dart';
 import 'package:PureBook/view/Search.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 var map = {0: "我的书架", 1: "排行榜", 2: "我的"};
 List<Book> bs = [];
@@ -33,6 +35,9 @@ class BookShelf extends StatefulWidget {
 class _BookShelfState extends State<BookShelf>
     with AutomaticKeepAliveClientMixin {
   List<Book> dataSource = [];
+  Widget body;
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: SpUtil.haveKey('login'));
 
   @override
   void initState() {
@@ -60,51 +65,83 @@ class _BookShelfState extends State<BookShelf>
   Widget build(BuildContext context) {
     super.build(context);
     // TODO: implement build
-    var c = new ListView.builder(
-        itemCount: dataSource.length,
-        itemBuilder: (context, i) {
-          return new GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              setState(() {
-               dataSource[i].NewChapterCount=0;
-              });
-              Book temp = dataSource[i];
-              updateBookList(dataSource[i]);
-              Navigator.of(context).push(new MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      new ReadBook(BookInfo.id(temp.Id, temp.Name))));
-            },
-            child: getBookItemView(dataSource[i]),
-          );
-        });
-    var n = new Container(
-      child: IconButton(
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color,
           icon: ImageIcon(
-            AssetImage("images/add.png"),
+            AssetImage("images/account.png"),
           ),
-          color: Colors.black,
-          tooltip: '搜索小说',
           onPressed: () {
-            showSearch(context: context, delegate: SearchBarDelegate());
-          }),
+            eventBus.fire(new OpenEvent(''));
+          },
+        ),
+        backgroundColor: Color.fromARGB(1, 245, 245, 245),
+        elevation: 0,
+        title: Text(
+          '书架',
+          style: TextStyle(fontSize: 18, color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color),
+        ),
+        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+              icon: Icon(Icons.search),
+              color: Store.value<AppThemeModel>(context).getThemeData().iconTheme.color,
+              tooltip: '搜索小说',
+              onPressed: () {
+                myshowSearch(context: context, delegate: SearchBarDelegate());
+              }),
+        ],
+      ),
+      body: SmartRefresher(
+        enablePullDown: true,
+        header: WaterDropHeader(),
+        footer: CustomFooter(
+          builder: (BuildContext context, LoadStatus mode) {
+            if (mode == LoadStatus.idle) {
+            } else if (mode == LoadStatus.loading) {
+              body = CupertinoActivityIndicator();
+            } else if (mode == LoadStatus.failed) {
+              body = Text("加载失败！点击重试！");
+            } else if (mode == LoadStatus.canLoading) {
+              body = Text("松手,加载更多!");
+            } else {
+              body = Text("到底了!");
+            }
+            return Center(
+              child: body,
+            );
+          },
+        ),
+        controller: _refreshController,
+        onRefresh: freshShelf,
+        child: ListView.builder(
+            itemCount: dataSource.length,
+            itemBuilder: (context, i) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    dataSource[i].NewChapterCount = 0;
+                  });
+                  Book temp = dataSource[i];
+                  updateBookList(dataSource[i]);
+                  Navigator.of(context).push(new MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          new ReadBook(BookInfo.id(temp.Id, temp.Name))));
+                },
+                child: getBookItemView(dataSource[i]),
+              );
+            }),
+      ),
     );
-
-    return new RefreshIndicator(
-      child: c,
-      onRefresh: _onRefresh,
-    );
-  }
-
-  Future<void> _onRefresh() async {
-    freshShelf();
   }
 
 //刷新书架
   freshShelf() async {
     //网络请求
-
-    Response response2 = await Util.dio.get(Common.domain + "/Bookshelf.aspx");
+    Response response2 =
+        await Util(null).http().get(Common.domain + "/Bookshelf.aspx");
     List decode = json.decode(response2.data)['data'];
     bs = decode.map((m) => new Book.fromJson(m)).toList();
     List<Book> tps;
@@ -115,6 +152,7 @@ class _BookShelfState extends State<BookShelf>
           if (tps[i].Id == bs[j].Id) {
             if (tps[i].UpdateTime != bs[j].UpdateTime) {
               tps[i].UpdateTime = bs[j].UpdateTime;
+              tps[i].LastChapter = bs[j].LastChapter;
               tps[i].NewChapterCount = 1;
             }
           }
@@ -127,54 +165,57 @@ class _BookShelfState extends State<BookShelf>
       dataSource = tps;
     });
     SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
+    _refreshController.refreshCompleted();
   }
 
   getBookItemView(Book item) {
     return Dismissible(
       key: Key(item.Id.toString()),
-      child: new Container(
-        child: new Row(
+      child: Container(
+        child: Row(
           children: <Widget>[
-            new Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                new Container(
+                Container(
                   padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                  child: new CachedNetworkImage(
-                    imageUrl: Common.imgPre + item.Img,
-                    height: 100,
-                    width: 80,
-                    fit: BoxFit.cover,
+                  child: Stack(
+                    children: <Widget>[
+                      CachedNetworkImage(
+                        imageUrl: Common.imgPre + item.Img,
+                        height: 100,
+                        width: 80,
+                        fit: BoxFit.cover,
+                      ),
+                      item.NewChapterCount == 1
+                          ? Positioned(
+                              right: 1,
+                              top: 1,
+                              child: Image.asset(
+                                'images/h6.png',
+                                width: 30,
+                                height: 30,
+                              ),
+                            )
+                          : Container(),
+                    ],
                   ),
                 )
               ],
             ),
-            new Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              verticalDirection: VerticalDirection.down,
-              // textDirection:,
-              textBaseline: TextBaseline.alphabetic,
-
               children: <Widget>[
                 Container(
-                    padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                    child: RichText(
-                      text: TextSpan(
-                          text: item.Name,
-                          style: TextStyle(color: Colors.black, fontSize: 18.0),
-                          children: <TextSpan>[
-                            TextSpan(
-                                style: TextStyle(
-                                    color: Colors.red, fontSize: 14.0),
-                                text:
-                                    '${item.NewChapterCount == 1 ? '(更新)' : ''}')
-                          ]),
-                    )),
-                Container(
                   padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                  child: new Text(
+                  child: Text(
+                    item.Name,
+                    style: TextStyle( fontSize: 16.0),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(left: 10.0, top: 5.0),
+                  child: Text(
                     item.LastChapter,
                     style: TextStyle(fontSize: 12),
                     overflow: TextOverflow.ellipsis,
@@ -193,19 +234,16 @@ class _BookShelfState extends State<BookShelf>
       onDismissed: (direction) {
         for (var i = 0; i < dataSource.length; i++) {
           if (dataSource[i].Id == item.Id) {
-            setState(() {
-              dataSource.removeAt(i);
-            });
-            SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
-            for (var value in new BookTag.fromJson(
-                    jsonDecode(SpUtil.getString(item.Id.toString())))
-                .chapters) {
-              SpUtil.remove(value.id.toString());
+            dataSource.removeAt(i);
+            if (mounted) {
+              setState(() {});
             }
-            ;
+            SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
+            Util(null).delLocalCache([item.Id.toString()]);
             break;
           }
         }
+        Toast.show('删除成功');
       },
       background: Container(
         color: Colors.green,
@@ -299,12 +337,11 @@ class _BookShelfState extends State<BookShelf>
       List decode2 = json.decode(name);
       books = decode2.map((m) => new Book.fromJson(m)).toList();
       setState(() {
-        dataSource=books;
+        dataSource = books;
       });
       //先登录获取cookie
-      BookAction.action.login().whenComplete(() async {
-        freshShelf();
-      });
+
+      freshShelf();
     } else {
       if (!SpUtil.haveKey('username')) {
         Toast.show('请登录后同步书架');
@@ -318,26 +355,15 @@ class _BookShelfState extends State<BookShelf>
   bool get wantKeepAlive => true;
 
   loginSync() async {
-    BookAction.action.login().whenComplete(() async {
-      //网络请求
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return new LoadingDialog(
-              text: "书架同步中…",
-            );
-          });
-      Response response2 = await Util.dio.get(Common.domain + "/Bookshelf.aspx");
-      Navigator.pop(context);
+    //网络请求
+    Response response2 =
+        await Util(context).http().get(Common.domain + "/Bookshelf.aspx");
 
-      List decode = json.decode(response2.data)['data'];
-      books = decode.map((m) => new Book.fromJson(m)).toList();
-      setState(() {
-        dataSource.insertAll(dataSource.length, books);
-      });
-      SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
+    List decode = json.decode(response2.data)['data'];
+    books = decode.map((m) => new Book.fromJson(m)).toList();
+    setState(() {
+      dataSource.insertAll(dataSource.length, books);
     });
-
+    SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
   }
 }

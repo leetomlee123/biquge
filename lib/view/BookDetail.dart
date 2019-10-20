@@ -3,18 +3,18 @@ import 'dart:convert';
 import 'package:PureBook/common/Rating.dart';
 import 'package:PureBook/common/common.dart';
 import 'package:PureBook/common/util.dart';
+import 'package:PureBook/entity/Book.dart';
+import 'package:PureBook/entity/BookInfo.dart';
+import 'package:PureBook/entity/ChapterList.dart';
 import 'package:PureBook/event/event.dart';
-import 'package:PureBook/model/Book.dart';
-import 'package:PureBook/model/BookInfo.dart';
-import 'package:PureBook/model/Chapter.dart';
-import 'package:PureBook/model/ChapterList.dart';
+import 'package:PureBook/model/ThemeModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/ReadBook.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 
-import '../common/LoadDialog.dart';
 import '../main.dart';
 
 class BookDetail extends StatefulWidget {
@@ -42,29 +42,45 @@ class _BookDetailState extends State<BookDetail>
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Store.value<AppThemeModel>(context)
+              .getThemeData()
+              .iconTheme
+              .color,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         elevation: 0,
+        backgroundColor: Color.fromARGB(1, 245, 245, 245),
         actions: <Widget>[
-          new MaterialButton(
+          MaterialButton(
             onPressed: () {
-              Navigator.of(context).push(new MaterialPageRoute(
+              Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => MainPage()));
             },
-            child: new Text("书架"),
+            child: Text(
+              "书架",
+              style: TextStyle(
+                  color: Store.value<AppThemeModel>(context)
+                      .getThemeData()
+                      .iconTheme
+                      .color),
+            ),
           )
         ],
       ),
-      body: new Column(
+      body: Column(
         children: <Widget>[
-          new Container(
-            color: Colors.grey,
-            child: new Row(children: <Widget>[
-              new Column(
+          Container(
+            child: Row(children: <Widget>[
+              Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  new Container(
+                  Container(
                     padding: const EdgeInsets.only(
                         left: 10.0, top: 10.0, bottom: 10.0),
                     child: new Image.network(
@@ -76,7 +92,7 @@ class _BookDetailState extends State<BookDetail>
                   )
                 ],
               ),
-              new Column(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,20 +105,20 @@ class _BookDetailState extends State<BookDetail>
                     padding: const EdgeInsets.only(left: 20.0, top: 5.0),
                     child: new Text(
                       _bookInfo.Name,
-                      style: TextStyle(fontSize: 15, color: Colors.white),
+                      style: TextStyle(fontSize: 15),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.only(left: 20.0, top: 2.0),
                     child: new Text('作者: ' + _bookInfo.Author,
-                        style: TextStyle(fontSize: 12, color: Colors.white)),
+                        style: TextStyle(fontSize: 12)),
                   ),
                   Container(
                     padding: const EdgeInsets.only(left: 20.0, top: 2.0),
                     child: new Text('类型: ' + _bookInfo.CName,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
-                        style: TextStyle(fontSize: 12, color: Colors.white)),
+                        style: TextStyle(fontSize: 12)),
                     width: 270,
                   ),
                   Container(
@@ -110,20 +126,19 @@ class _BookDetailState extends State<BookDetail>
                     child: new Text('状态: ' + _bookInfo.BookStatus,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
-                        style: TextStyle(fontSize: 12, color: Colors.white)),
+                        style: TextStyle(fontSize: 12)),
                     width: 270,
                   ),
                   Container(
                       padding: const EdgeInsets.only(
                           left: 15.0, top: 2.0, bottom: 10.0),
-                      child: new Row(
+                      child: Row(
                         children: <Widget>[
                           Rating(
                             initialRating: _bookInfo.BookVote.Score.toInt(),
                           ),
-                          new Text(
+                          Text(
                             '${_bookInfo.BookVote.Score}分',
-                            style: TextStyle(color: Colors.white),
                           )
                         ],
                       )),
@@ -131,164 +146,168 @@ class _BookDetailState extends State<BookDetail>
               ),
             ]),
           ),
-          new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            verticalDirection: VerticalDirection.down,
-            // textDirection:,
-            textBaseline: TextBaseline.alphabetic,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(left: 17.0, top: 5.0),
-                child: new Text(
-                  '简介',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-              ),
-              new Divider(),
-              Padding(
-                padding: const EdgeInsets.only(left: 17.0, top: 5.0),
-                child: new Text(
-                  _bookInfo.Desc,
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          new Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            verticalDirection: VerticalDirection.down,
-            // textDirection:,
-            textBaseline: TextBaseline.alphabetic,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(left: 17.0, top: 15.0),
-                child: new Text(
-                  '目录',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                ),
-              ),
-              Divider(),
-              new ListTile(
-                trailing: Icon(Icons.keyboard_arrow_right),
-                leading: Icon(Icons.list),
-                title: new Text('最近更新: ' + _bookInfo.LastTime,
-                    style: TextStyle(fontSize: 15)),
-                subtitle: new Text(_bookInfo.LastChapter),
-                onTap: () {
-                  _bookInfo.CId = -1;
-                  addToShelf();
-                  Navigator.pop(context);
-                  Navigator.of(context).push(new MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          new ReadBook(_bookInfo)));
-                },
-              ),
-            ],
-          ),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(left: 17.0, top: 5.0),
-                child: new Text(
-                  '${_bookInfo.Author}  还写过',
-                  style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-          Divider(),
-          Expanded(child: ListView.builder(
-            shrinkWrap: true,
-            itemBuilder: (context, i) {
-              return new GestureDetector(behavior: HitTestBehavior.opaque, child: new Container(
-                child: new Row(
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  verticalDirection: VerticalDirection.down,
+                  // textDirection:,
+                  textBaseline: TextBaseline.alphabetic,
                   children: <Widget>[
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        new Container(
-                          padding:
-                          const EdgeInsets.only(left: 10.0, top: 10.0),
-                          child: new CachedNetworkImage(
-                            imageUrl: Common.imgPre +
-                                _bookInfo.SameUserBooks[i].Img,
-                            height: 100,
-                            width: 80,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 17.0, top: 5.0),
+                      child: new Text(
+                        '简介',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
                     ),
-                    new Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      verticalDirection: VerticalDirection.down,
-                      // textDirection:,
-                      textBaseline: TextBaseline.alphabetic,
-
-                      children: <Widget>[
-                        Container(
-                            padding: const EdgeInsets.only(
-                                left: 10.0, top: 10.0),
-                            child: Text(
-                              _bookInfo.SameUserBooks[i].Name,
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 18.0),
-                            )),
-                        Container(
-                          padding:
-                          const EdgeInsets.only(left: 10.0, top: 10.0),
-                          child: new Text(
-                            _bookInfo.SameUserBooks[i].Author,
-                            style: TextStyle(fontSize: 12),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          padding:
-                          const EdgeInsets.only(left: 10.0, top: 10.0),
-                          child: new Text(
-                              _bookInfo.SameUserBooks[i].LastChapter,
-                              style: TextStyle(
-                                  color: Colors.grey, fontSize: 11)),
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 17.0, top: 5.0),
+                      child: new Text(
+                        _bookInfo.Desc,
+                        style: TextStyle(fontSize: 12),
+                      ),
                     ),
                   ],
                 ),
-              ),onTap: () async {
-                String url =
-                    'https://shuapi.jiaston.com/info/${_bookInfo.SameUserBooks[i].Id}.html';
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return new LoadingDialog(
-                        text: "加载中…",
-                      );
-                    });
-                Response future = await Util.dio.get(url);
-                Navigator.pop(context);
-                var data = jsonDecode(future.data)['data'];
-                BookInfo bookInfo = new BookInfo.fromJson(data);
-                Navigator.pop(context);
+                Divider(),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  verticalDirection: VerticalDirection.down,
+                  // textDirection:,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 17.0, top: 15.0),
+                      child: new Text(
+                        '目录',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    new ListTile(
+                      trailing: Icon(Icons.keyboard_arrow_right),
+                      leading: Icon(Icons.list),
+                      title: new Text('最近更新: ' + _bookInfo.LastTime,
+                          style: TextStyle(fontSize: 15)),
+                      subtitle: new Text(_bookInfo.LastChapter),
+                      onTap: () {
+                        _bookInfo.CId = -1;
+                        addToShelf();
+                        Navigator.pop(context);
+                        Navigator.of(context).push(new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new ReadBook(_bookInfo)));
+                      },
+                    ),
+                  ],
+                ),
+                Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 17.0, top: 5.0),
+                      child: new Text(
+                        '${_bookInfo.Author}  还写过',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                ListView.builder(
+                  shrinkWrap: true, //解决无限高度问题
+                  physics: NeverScrollableScrollPhysics(), //禁用滑动事件
+                  itemBuilder: (context, i) {
+                    return new GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      child: new Container(
+                        child: new Row(
+                          children: <Widget>[
+                            new Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                new Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0, top: 10.0),
+                                  child: new CachedNetworkImage(
+                                    imageUrl: Common.imgPre +
+                                        _bookInfo.SameUserBooks[i].Img,
+                                    height: 100,
+                                    width: 80,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              ],
+                            ),
+                            new Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              verticalDirection: VerticalDirection.down,
+                              // textDirection:,
+                              textBaseline: TextBaseline.alphabetic,
 
-                Navigator.of(context).push(new MaterialPageRoute(
-                    builder: (BuildContext context) =>
-                    new BookDetail(bookInfo)));
-              },);
+                              children: <Widget>[
+                                Container(
+                                    padding: const EdgeInsets.only(
+                                        left: 10.0, top: 10.0),
+                                    child: Text(
+                                      _bookInfo.SameUserBooks[i].Name,
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18.0),
+                                    )),
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0, top: 10.0),
+                                  child: new Text(
+                                    _bookInfo.SameUserBooks[i].Author,
+                                    style: TextStyle(fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0, top: 10.0),
+                                  child: new Text(
+                                      _bookInfo.SameUserBooks[i].LastChapter,
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 11)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      onTap: () async {
+                        String url =
+                            'https://shuapi.jiaston.com/info/${_bookInfo.SameUserBooks[i].Id}.html';
 
-            },
-            itemCount: _bookInfo.SameUserBooks.length,
+                        Response future = await Util(context).http().get(url);
+                        Navigator.pop(context);
+                        var data = jsonDecode(future.data)['data'];
+                        BookInfo bookInfo = new BookInfo.fromJson(data);
+                        Navigator.pop(context);
+
+                        Navigator.of(context).push(new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                new BookDetail(bookInfo)));
+                      },
+                    );
+                  },
+                  itemCount: _bookInfo.SameUserBooks.length,
+                ),
+              ],
+            ),
           )
-            ,)
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -357,10 +376,11 @@ class _BookDetailState extends State<BookDetail>
     );
   }
 
-   addToShelf()  {
-   Util.dio.post(Common.bookAction,data: {'action':'addbookcase','bookId':_bookInfo.Id}).then((v){
-     print(v.data);
-   });
+  addToShelf() {
+    Util(null).http().post(Common.bookAction,
+        data: {'action': 'addbookcase', 'bookId': _bookInfo.Id}).then((v) {
+      print(v.data);
+    });
 
     setState(() {
       if (ids.contains(_bookInfo.Id)) {
@@ -408,46 +428,43 @@ class _BookDetailState extends State<BookDetail>
     });
     var url = Common.chaptersUrl + _bookInfo.Id.toString() + '/';
 
-    Response response = await Util.dio.get(url);
+    Response response = await Util(null).http().get(url);
 
     String data = response.data;
 
     String replace = data.replaceAll('},]', '}]');
     var jsonDecode3 = jsonDecode(replace)['data'];
     List jsonDecode2 = jsonDecode3['list'];
-    List<Chapter> temp = [];
+
     var list = jsonDecode2.map((m) => new ChapterList.fromJson(m)).toList();
     for (var i = 0; i < list.length; i++) {
-      //目录名hasContent=0
-      temp.add(new Chapter(0, 0, list[i].name));
       var list2 = list[i].list;
-      for (var j = 0; j < list2.length; j++) {
-        var url =
-            'https://shuapi.jiaston.com/book/${_bookInfo.Id}/${list2[j].id}.html';
-        Response response = await Util.dio.get(url);
-        String content = jsonDecode(response.data)['data']['content'];
-        String name = jsonDecode(response.data)['data']['cname'];
-        content = content.replaceAll("\r\n　　\r\n", "\n");
-        if (content.startsWith("\r\n")) {
-          content = content.substring(4).trim();
+      for (var j = 0; j < list2.length;) {
+        var cpt = list2[j];
+        if ((!SpUtil.haveKey(cpt.id.toString())) && cpt.hasContent != 0) {
+          var url = Common.bookContentUrl +
+              _bookInfo.Id.toString() +
+              "/" +
+              cpt.id.toString() +
+              ".html";
+          Response response = await Util(null).http().get(url);
+          String content = jsonDecode(response.data)['data']['content'];
+          content = content
+              .replaceAll("\r\n　　\r\n", "\n")
+              .replaceAll('“', '')
+              .replaceAll('”', '');
+          if (content.startsWith("\r\n")) {
+            content = content.substring(4).trim();
+          }
+          if (content.startsWith('\n')) {
+            content = content.substring(1);
+          }
+          SpUtil.putString(cpt.id.toString(), content);
+          cpt.hasContent = 2;
+          print('${cpt.name} 下载成功');
         }
-        List<String> contents = [];
-        var start = 0;
-        var pageLen = 300;
-        var lens = content.length;
-        while (lens >= pageLen) {
-          contents.add(content.substring(start, start + pageLen));
-          start += pageLen;
-          lens -= pageLen;
-        }
-        contents.add(content.substring(start, content.length));
-
-        SpUtil.putStringList(list2[j].id.toString(), contents);
-        SpUtil.putString(list2[j].id.toString() + "name", name);
-        //标志 缓存2 当前章节已缓存
-        temp.add(new Chapter(2, list2[j].id, list2[j].name));
+        j++;
       }
-      SpUtil.putString(_bookInfo.Id.toString() + 'chapters', jsonEncode(temp));
     }
   }
 

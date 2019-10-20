@@ -1,14 +1,15 @@
 import 'dart:convert';
 
-import 'package:PureBook/common/LoadDialog.dart';
 import 'package:PureBook/common/common.dart';
+import 'package:PureBook/common/toast.dart';
 import 'package:PureBook/common/util.dart';
+import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/event/event.dart';
+import 'package:PureBook/model/ThemeModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/Forgetpass.dart';
 import 'package:PureBook/view/Register.dart';
-import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 
@@ -22,23 +23,119 @@ class PersonCenter extends StatefulWidget {
 
 class _PersonCenter extends State<PersonCenter>
     with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    final personbody =
+        ListView(padding: const EdgeInsets.only(), children: <Widget>[
+      UserAccountsDrawerHeader(
+//      margin: EdgeInsets.zero,
+        accountName: Text(
+          SpUtil.getString('username'),
+        ),
+        accountEmail: Text(
+          SpUtil.haveKey('email') ? SpUtil.getString('email') : '点击头像登陆',
+        ),
+        currentAccountPicture: GestureDetector(
+          child: CircleAvatar(
+            backgroundImage: AssetImage("images/fu.png"),
+          ),
+          onTap: () {
+            Navigator.of(context).push(new MaterialPageRoute(
+                builder: (BuildContext context) => Login()));
+          },
+        ),
+      ),
+      ClipRect(
+        child: ListTile(
+          leading: CircleAvatar(backgroundImage: AssetImage('images/${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? 'moon.png' : 'sun.png'}'),),
+
+          title: Text(
+              '${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? '夜间模式' : '日间模式'}'),
+          onTap: () => {
+            Store.value<AppThemeModel>(context).setModel(
+                Store.value<AppThemeModel>(context).getThemeData().brightness ==
+                    Brightness.light)
+          },
+        ),
+      ),
+      ListTile(
+        leading: CircleAvatar(child: Text('Re'),),
+        title: Text('免责声明'),
+        onTap: () => {},
+      ),
+      AboutListTile(
+
+        icon: CircleAvatar(child: Text('Ab'),),
+        child: Text("关于"),
+        applicationName: "清阅",
+        aboutBoxChildren: <Widget>[
+          Text('世人为荣利缠缚，动曰尘世苦海，不知云白山青，川行石立，花迎鸟笑，谷答樵讴，世亦不尘、海亦不苦、彼自尘苦其心尔')
+        ],
+      ),
+      MaterialButton(
+        child: Text('退出登录'),
+        onPressed: () {
+          SpUtil.remove('username');
+          SpUtil.remove('login');
+          SpUtil.remove('email');
+
+          eventBus.fire(new BooksEvent([]));
+          List books = jsonDecode(SpUtil.getString(Common.listbookname));
+          Util(null).delLocalCache(
+              books.map((f) => Book.fromJson(f).Id.toString()).toList());
+          SpUtil.remove(Common.listbookname);
+        },
+      )
+    ]);
+
+    return Scaffold(
+      body: personbody,
+    );
+  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+}
+
+class Login extends StatelessWidget {
   String username = '';
-  static GlobalKey<ScaffoldState> _globalKey = new GlobalKey();
   bool isLogin = false;
   String pwd;
 
   @override
-  void initState() {
-//    requestPermission();
-    // TODO: implement initState
-    if (SpUtil.haveKey('login')) {
-      isLogin = true;
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context);
+    login() async {
+      FormData formData = new FormData.fromMap({
+        "password": pwd,
+        "username": username,
+        "usecookie": 43200,
+        "action": "login",
+      });
+
+      Response response;
+      try {
+        response =
+            await Util(context).http().post(Common.login, data: formData);
+      } catch (e) {
+        Toast.show('登陆异常,请重试...');
+      }
+
+      var data = jsonDecode(response.data)['data'];
+      if (data['Status'] != 1) {
+        Toast.show(data['Message']);
+      } else {
+        SpUtil.putString('email', data['UserInfo']['Email']);
+        SpUtil.putString('username', username);
+        SpUtil.putBool('login', true);
+        //书架同步
+        eventBus.fire(SyncShelfEvent(''));
+        Navigator.pop(context);
+      }
+    }
+
     final logo = Hero(
       tag: 'God Group Ltcd',
       child: CircleAvatar(
@@ -53,7 +150,7 @@ class _PersonCenter extends State<PersonCenter>
       decoration: InputDecoration(
         hintText: '账号',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+//        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       onChanged: (String value) {
         this.username = value;
@@ -66,7 +163,7 @@ class _PersonCenter extends State<PersonCenter>
       decoration: InputDecoration(
         hintText: '密码',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+//        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       onChanged: (String value) {
         print(value);
@@ -109,31 +206,6 @@ class _PersonCenter extends State<PersonCenter>
       ),
     );
 
-    final lorem = Padding(
-      padding: EdgeInsets.only(top: 2.0),
-      child: Text(
-        '世人为荣利缠缚，动曰尘世苦海，不知云白山青，川行石立，花迎鸟笑，谷笑樵讴，世亦不尘、海亦不苦、彼自尘苦其心尔。',
-        style: TextStyle(fontSize: 16.0, color: Colors.black),
-      ),
-    );
-    final unmount = Padding(
-      padding: EdgeInsets.all(8.0),
-      child: new FlatButton(
-          highlightColor: Colors.grey,
-          onPressed: () {
-            SpUtil.remove('pwd');
-            SpUtil.remove('username');
-            SpUtil.remove('login');
-            setState(() {
-              isLogin = false;
-            });
-            eventBus.fire(new BooksEvent([]));
-
-            SpUtil.remove(Common.listbookname);
-          },
-          child: new Text('注销账户',
-              style: TextStyle(fontSize: 16.0, color: Colors.black))),
-    );
     final forgotLabel = FlatButton(
       child: Text(
         '忘记密码?',
@@ -165,7 +237,7 @@ class _PersonCenter extends State<PersonCenter>
           SizedBox(height: 8.0),
           password,
           loginButton,
-          new Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               forgotLabel,
@@ -175,70 +247,10 @@ class _PersonCenter extends State<PersonCenter>
         ],
       ),
     );
-    final personbody = Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(left: 28.0, right: 28.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [
-          Colors.white70,
-          Colors.white70,
-        ]),
-      ),
-      child: Column(
-        children: <Widget>[welcome, Divider(), lorem, unmount],
-      ),
-    );
+    // TODO: implement build
 
-    return Scaffold(
-      key: _globalKey,
-      backgroundColor: Colors.white,
-      body: !isLogin ? loginBody : personbody,
+    return Material(
+      child: loginBody,
     );
   }
-
-  login() async {
-    FormData formData = new FormData.fromMap({
-      "password": pwd,
-      "username": username,
-      "usecookie": 525600,
-      "action": "login",
-      "submit": "提 交"
-    });
-
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return new LoadingDialog(
-            text: "登陆中…",
-          );
-        });
-    Response response;
-    try {
-      response = await Util.dio.post(Common.login, data: formData);
-    } catch (e) {
-      _globalKey.currentState
-          .showSnackBar(new SnackBar(content: new Text('登陆异常,请重试...')));
-    }
-    Navigator.pop(context);
-    Util.dio.interceptors.add(CookieManager(new CookieJar()));
-    var data = jsonDecode(response.data)['data'];
-    if (data['Status'] != 1) {
-      _globalKey.currentState
-          .showSnackBar(new SnackBar(content: new Text(data['Message'])));
-    } else {
-      SpUtil.putString('username', username);
-      SpUtil.putString('pwd', pwd);
-      SpUtil.putBool('login', true);
-      //书架同步
-      eventBus.fire(new SyncShelfEvent(''));
-      setState(() {
-        isLogin = true;
-      });
-    }
-  }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }

@@ -47,8 +47,8 @@ class _ForgetPassState extends State<ForgetPass> {
               decoration: InputDecoration(
                 hintText: '账号',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 this.account = value;
@@ -61,8 +61,8 @@ class _ForgetPassState extends State<ForgetPass> {
               decoration: InputDecoration(
                 hintText: '邮箱',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 email = value;
@@ -75,8 +75,8 @@ class _ForgetPassState extends State<ForgetPass> {
               decoration: InputDecoration(
                 hintText: '输入新密码',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 newpwd = value;
@@ -89,8 +89,8 @@ class _ForgetPassState extends State<ForgetPass> {
               decoration: InputDecoration(
                 hintText: '重复新密码',
                 contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32.0)),
+//                border: OutlineInputBorder(
+//                    borderRadius: BorderRadius.circular(32.0)),
               ),
               onChanged: (String value) {
                 repetpwd = value;
@@ -134,26 +134,17 @@ class _ForgetPassState extends State<ForgetPass> {
         "action": "forwardpwd",
       });
 
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return new LoadingDialog(
-              text: "修改中…",
-            );
-          });
+
       Response response;
 
       try {
-        response = await Util.dio
+        response = await Util(context).http()
             .post(Common.domain + '/ModifyUser.aspx', data: formData);
       } catch (e) {
         _scaffoldkey.currentState
             .showSnackBar(new SnackBar(content: new Text('修改密码异常,请重试...')));
       } finally {
-        Navigator.pop(context);
       }
-
       var data = jsonDecode(response.data)['data'];
       if (data['Status'] != 1) {
         _scaffoldkey.currentState
