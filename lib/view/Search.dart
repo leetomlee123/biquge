@@ -3,9 +3,10 @@ import 'dart:convert';
 import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/entity/SearchItem.dart';
+import 'package:PureBook/model/SearchModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/MySearchDelegate.dart';
 import 'package:dio/dio.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -15,8 +16,6 @@ import 'BookDetail.dart';
 String urlAdd = "https://shuapi.jiaston.com/BookAction.aspx";
 
 class SearchBarDelegate extends MySearchDelegate<String> {
-  List<Widget> t = [];
-
   @override
   ThemeData appBarTheme(BuildContext context) {
     // TODO: implement appBarTheme
@@ -55,23 +54,20 @@ class SearchBarDelegate extends MySearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    List<String> i = [];
-    if (SpUtil.haveKey('history')) {
-      i = SpUtil.getStringList('history');
-    }
+    var value = Store.value<SearchModel>(context);
+    List<String> i = value.history;
     for (var ii = 0; ii < i.length; ii++) {
       if (i[ii] == query) {
         i.removeAt(ii);
       }
     }
     i.insert(0, query);
-    SpUtil.putStringList('history', i.sublist(0, i.length > 6 ? 6 : i.length));
+    value.setHistory(i);
     return SearchResult(query);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    getHistory();
     return Padding(
         padding: const EdgeInsets.all(5.0),
         child: Column(
@@ -89,58 +85,60 @@ class SearchBarDelegate extends MySearchDelegate<String> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    FlatButton(
-                        onPressed: () {
-                          SpUtil.remove('history');
-                          getHistory();
-                        },
-                        child: new Text('清空历史'))
+                    Store.connect<SearchModel>(builder: (ctx, data, child) {
+                      var d = (data as SearchModel);
+                      return FlatButton(
+                          onPressed: () {
+                            d.clearHistory();
+                          },
+                          child: Text('清空历史'));
+                    }),
                   ],
                 ),
               ],
             ),
-            Expanded(
-              child: GridView.count(
-                shrinkWrap: true,
-                //水平子Widget之间间距
-                crossAxisSpacing: 60.0,
-                //垂直子Widget之间间距
-                mainAxisSpacing: 20.0,
-                //GridView内边距
-                padding: EdgeInsets.all(10.0),
-                //一行的Widget数量
-                crossAxisCount: 3,
-                //子Widget宽高比例
-                childAspectRatio: 2.0,
-                //子Widget列表
-                children: t,
-              ),
-            ),
+            Store.connect<SearchModel>(builder: (ctx, data, child) {
+              var d = (data as SearchModel);
+              return Wrap(
+                spacing: 2, //主轴上子控件的间距
+                runSpacing: 5, //交叉轴上子控件之间的间距
+                children: getHistory(d.history, context),
+              );
+            }),
           ],
         ));
   }
 
-  getHistory() {
-    var history = SpUtil.getStringList('history');
+  getHistory(List<String> history, BuildContext context) {
 
+    List<Widget> wds = [];
     for (var i = 0; i < history.length; i++) {
-      t.add(getItemContainer(history[i]));
+//      wds.add(Container(
+//        width: 90,
+//        height: 30,
+//        alignment: Alignment.center,
+//        color: Colors.grey,
+//        child: InkWell(
+//          child: Text(
+//            history[i],
+//            style: TextStyle(
+//              fontSize: 14,
+//              fontWeight: FontWeight.bold,
+//            ),
+//          ),
+//          onTap: () async {
+//            query=history[i];
+//          },
+//        ),
+//      ));
+    wds.add(ActionChip(label: Text(history[i]),onPressed: (){
+        this.query=history[i];
+    },));
     }
+    return wds;
   }
 
-  Widget getItemContainer(String item) {
-    return Container(
-      alignment: Alignment.center,
-      child: FlatButton(
-          onPressed: () async {
-            query = item;
-          },
-          child: Text(item,
-              style: TextStyle(color: Colors.blue, fontSize: 13),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis)),
-    );
-  }
+
 }
 
 class SearchResult extends StatefulWidget {
@@ -237,15 +235,15 @@ class _SearchResultState extends State<SearchResult>
       controller: _refreshController,
       onRefresh: _onRefresh,
       onLoading: _onLoading,
-      child: ListView.builder(
+      child: bks.length==0?Container():ListView.builder(
         itemBuilder: (context, i) {
           var auth = bks[i].Author;
           var cate = bks[i].CName;
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
-            child: new Row(
+            child:  Row(
               children: <Widget>[
-                new Column(
+                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     new Container(
@@ -259,7 +257,7 @@ class _SearchResultState extends State<SearchResult>
                     )
                   ],
                 ),
-                new Column(
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,

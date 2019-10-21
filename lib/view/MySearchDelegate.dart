@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:PureBook/model/SearchModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -509,6 +511,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
+
+
             },
             decoration: InputDecoration(
               border: InputBorder.none,

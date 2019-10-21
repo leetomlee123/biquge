@@ -1,4 +1,5 @@
 import 'package:PureBook/model/BookModel.dart';
+import 'package:PureBook/model/SearchModel.dart';
 import 'package:PureBook/model/ShelfModel.dart';
 import 'package:PureBook/model/ThemeModel.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class Store {
         ChangeNotifierProvider(builder: (_) => AppThemeModel()),
         ChangeNotifierProvider(builder: (_) => BookModel()),
         ChangeNotifierProvider(builder: (_) => ShelfModel()),
+        ChangeNotifierProvider(builder: (_) => SearchModel()),
       ],
       child: child,
     );

@@ -51,8 +51,10 @@ class _PersonCenter extends State<PersonCenter>
       ClipRect(
         child: ListTile(
           leading: CircleAvatar(
-            child: Text(
-                '${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? 'Mo' : 'Su'}'),
+            child: Store.connect<AppThemeModel>(builder: (ctx, atm, child) {
+              return Text(
+                  '${(atm as AppThemeModel).getThemeData().brightness == Brightness.light ? 'Mo' : 'Su'}');
+            }),
           ),
           title: Text(
               '${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? '夜间模式' : '日间模式'}'),
