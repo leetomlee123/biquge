@@ -14,6 +14,7 @@ import 'package:PureBook/view/ReadBook.dart';
 import 'package:PureBook/view/Search.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class _BookShelfState extends State<BookShelf>
 
   @override
   void initState() {
+
     eventBus
         .on<BooksEvent>()
         .listen((BooksEvent booksEvent) => fresh(booksEvent.books));

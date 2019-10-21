@@ -15,11 +15,13 @@ import 'event/event.dart';
 
 List<Book> books = [];
 
+
+
 void main() async {
+
   await SpUtil.getInstance();
   await DirectoryUtil.getInstance();
-  FirebaseAdMob.instance
-      .initialize(appId: "ca-app-pub-6006602100377888~4888848498");
+
   runApp(Store.init(child: MyApp()));
   if (Platform.isAndroid) {
     SystemUiOverlayStyle systemUiOverlayStyle =
@@ -78,6 +80,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       drawer: Drawer(
         child: PersonCenter(),
