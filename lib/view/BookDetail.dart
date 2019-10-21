@@ -516,7 +516,6 @@ class _BookDetailState extends State<BookDetail>
   Future loadShlef() async {
     var name = SpUtil.getString(Common.listbookname);
     List decode2 = json.decode(name);
-
     bs = decode2.map((m) => new Book.fromJson(m)).toList();
     ids = bs.map((f) => f.Id).toList();
   }

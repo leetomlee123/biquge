@@ -147,14 +147,8 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                             )
                           ],
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
+                        Expanded(child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          verticalDirection: VerticalDirection.down,
-                          // textDirection:,
-                          textBaseline: TextBaseline.alphabetic,
-
                           children: <Widget>[
                             Container(
                                 padding: const EdgeInsets.only(
@@ -186,14 +180,16 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                             ),
                           ],
                         ),
+                        ),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
-                            Text(
+                            Padding(padding: EdgeInsets.only(right: 20),child:       Text(
                               items[i].Score.toString(),
                               style:
-                                  TextStyle(fontSize: 15, color: Colors.blue),
-                            ),
+                                  TextStyle(fontSize: 15),
+                            ),),
+                      
                           ],
                         )
                       ],
