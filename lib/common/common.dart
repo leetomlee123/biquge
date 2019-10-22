@@ -1,6 +1,6 @@
 
 class Common {
-  static String imgPre = "https://imgapi.xllxdg.com/BookFiles/BookImages/";
+  static String imgPre = "https://appbdimg.cdn.bcebos.com/BookFiles/BookImages/";
   static String domain = "https://dynic.hzwip.com";
 
   static String login = domain+"/Login.aspx";

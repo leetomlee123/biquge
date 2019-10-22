@@ -113,24 +113,7 @@ class SearchBarDelegate extends MySearchDelegate<String> {
 
     List<Widget> wds = [];
     for (var i = 0; i < history.length; i++) {
-//      wds.add(Container(
-//        width: 90,
-//        height: 30,
-//        alignment: Alignment.center,
-//        color: Colors.grey,
-//        child: InkWell(
-//          child: Text(
-//            history[i],
-//            style: TextStyle(
-//              fontSize: 14,
-//              fontWeight: FontWeight.bold,
-//            ),
-//          ),
-//          onTap: () async {
-//            query=history[i];
-//          },
-//        ),
-//      ));
+
     wds.add(ActionChip(label: Text(history[i]),onPressed: (){
         this.query=history[i];
     },));

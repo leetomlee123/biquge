@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:PureBook/common/Rating.dart';
 import 'package:PureBook/common/common.dart';
+import 'package:PureBook/common/toast.dart';
 import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/entity/BookInfo.dart';
@@ -12,13 +13,10 @@ import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/ReadBook.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
-
-
 
 class BookDetail extends StatefulWidget {
   BookInfo _bookInfo;
@@ -39,16 +37,11 @@ class _BookDetailState extends State<BookDetail>
   List<Book> bs = [];
   bool inShelf = false;
   bool down = false;
-  BannerAd _myBanner;
-  MobileAdTargetingInfo _targetingInfo;
+
   _BookDetailState(this._bookInfo);
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAdMob.instance
-        .initialize(appId: "ca-app-pub-6006602100377888~3769076624").then((res){
-      _myBanner..load()..show();
-    });
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
@@ -271,10 +264,12 @@ class _BookDetailState extends State<BookDetail>
                                     child: Text(
                                       _bookInfo.SameUserBooks[i].Name,
                                       style: TextStyle(
-                                          color: Store.value<AppThemeModel>(context)
+                                          color: Store.value<AppThemeModel>(
+                                                  context)
                                               .getThemeData()
                                               .iconTheme
-                                              .color, fontSize: 18.0),
+                                              .color,
+                                          fontSize: 18.0),
                                     )),
                                 Container(
                                   padding: const EdgeInsets.only(
@@ -306,7 +301,6 @@ class _BookDetailState extends State<BookDetail>
                         Navigator.pop(context);
                         var data = jsonDecode(future.data)['data'];
                         BookInfo bookInfo = new BookInfo.fromJson(data);
-                        Navigator.pop(context);
 
                         Navigator.of(context).push(new MaterialPageRoute(
                             builder: (BuildContext context) =>
@@ -390,7 +384,7 @@ class _BookDetailState extends State<BookDetail>
   addToShelf() {
     Util(null).http().post(Common.bookAction,
         data: {'action': 'addbookcase', 'bookId': _bookInfo.Id}).then((v) {
-      print(v.data);
+      Toast.show('添加到书架');
     });
 
     setState(() {
@@ -480,44 +474,18 @@ class _BookDetailState extends State<BookDetail>
   }
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    _myBanner.dispose();
-  }
-
-  @override
   void initState() {
     // TODO: implement initState
     loadShlef();
-//    getBookInfo();
-  _targetingInfo= MobileAdTargetingInfo(
-    keywords: <String>['games', 'pubg'],
-    contentUrl: 'https://flutter.cn',
-
-    childDirected: true,
- // or MobileAdGender.female, MobileAdGender.unknown
-    testDevices: <String>[],
-    // Android emulators are considered test devices
-  );
-  _myBanner=BannerAd(
-    // Replace the testAdUnitId with an ad unit id from the AdMob dash.
-    // https://developers.google.com/admob/android/test-ads
-    // https://developers.google.com/admob/ios/test-ads
-    adUnitId: 'ca-app-pub-6006602100377888/6756340222',
-    size: AdSize.smartBanner,
-    targetingInfo: _targetingInfo,
-    listener: (MobileAdEvent event) {
-      print("BannerAd event is $event");
-    },
-  );
   }
 
   Future loadShlef() async {
-    var name = SpUtil.getString(Common.listbookname);
-    List decode2 = json.decode(name);
-    bs = decode2.map((m) => new Book.fromJson(m)).toList();
-    ids = bs.map((f) => f.Id).toList();
+    if (SpUtil.haveKey(Common.listbookname)) {
+      var name = SpUtil.getString(Common.listbookname);
+      List decode2 = json.decode(name);
+      bs = decode2.map((m) => Book.fromJson(m)).toList();
+      ids = bs.map((f) => f.Id).toList();
+    }
   }
 
   @override

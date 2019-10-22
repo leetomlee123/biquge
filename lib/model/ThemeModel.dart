@@ -26,6 +26,7 @@ class AppThemeModel with ChangeNotifier {
 
   set themeData(ThemeData value) {
     _themeData = value;
+    SpUtil.putBool('theme', _themeData.brightness==Brightness.light);
     notifyListeners();
   }
 
@@ -35,11 +36,8 @@ class AppThemeModel with ChangeNotifier {
       unselectedWidgetColor: !f ? Colors.white : Colors.black12,
     );
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
     SpUtil.putBool('theme', _themeData.brightness==Brightness.light);
   }
+
+
 }

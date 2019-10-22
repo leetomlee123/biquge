@@ -14,7 +14,6 @@ import 'package:PureBook/view/ReadBook.dart';
 import 'package:PureBook/view/Search.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +41,6 @@ class _BookShelfState extends State<BookShelf>
 
   @override
   void initState() {
-
     eventBus
         .on<BooksEvent>()
         .listen((BooksEvent booksEvent) => fresh(booksEvent.books));
@@ -60,7 +58,7 @@ class _BookShelfState extends State<BookShelf>
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    SpUtil.putString(Common.listbookname, jsonEncode(books));
+    SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
   }
 
   @override
@@ -172,7 +170,7 @@ class _BookShelfState extends State<BookShelf>
       for (var i = 0; i < tps.length; i++) {
         for (var j = 0; j < bs.length; j++) {
           if (tps[i].Id == bs[j].Id) {
-            if (tps[i].UpdateTime != bs[j].UpdateTime) {
+            if (tps[i].LastChapter != bs[j].LastChapter) {
               tps[i].UpdateTime = bs[j].UpdateTime;
               tps[i].LastChapter = bs[j].LastChapter;
               tps[i].NewChapterCount = 1;
@@ -210,13 +208,16 @@ class _BookShelfState extends State<BookShelf>
                         fit: BoxFit.cover,
                       ),
                       item.NewChapterCount == 1
-                          ? Positioned(
-                              right: 1,
-                              top: 1,
-                              child: Image.asset(
-                                'images/h6.png',
-                                width: 30,
-                                height: 30,
+                          ? Container(
+                        height: 100,
+                        width: 80,
+                              child: Align(
+                                alignment: Alignment.topRight,
+                                child: Image.asset(
+                                  'images/h6.png',
+                                  width: 30,
+                                  height: 30,
+                                ),
                               ),
                             )
                           : Container(),
@@ -245,7 +246,7 @@ class _BookShelfState extends State<BookShelf>
                 ),
                 Container(
                   padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                  child: new Text(item.UpdateTime,
+                  child: Text(item.UpdateTime,
                       style: TextStyle(color: Colors.grey, fontSize: 11)),
                 ),
               ],
@@ -265,7 +266,10 @@ class _BookShelfState extends State<BookShelf>
             break;
           }
         }
-        Toast.show('删除成功');
+        Util(null).http().post(Common.bookAction,
+            data: {'bookIds': item.Id, 'action': 'removebookcase'}).then((v) {
+          Toast.show('删除成功');
+        });
       },
       background: Container(
         color: Colors.green,
@@ -294,7 +298,7 @@ class _BookShelfState extends State<BookShelf>
 
         if (direction == DismissDirection.endToStart) {
           // 从右向左  也就是删除
-          _confirmContent = '确认删除${item.Name}？';
+          _confirmContent = '确认删除     ${item.Name}';
           _alertDialog = _createDialog(
             _confirmContent,
             () {
@@ -381,18 +385,16 @@ class _BookShelfState extends State<BookShelf>
     Response response2 =
         await Util(context).http().get(Common.domain + "/Bookshelf.aspx");
     List decode = json.decode(response2.data)['data'];
-    books = decode.map((m) =>  Book.fromJson(m)).toList();
-    var ids = dataSource.map((f)=>f.Id).toList();
-    books.forEach((f){
-      if(!ids.contains(f.Id)){
+    books = decode.map((m) => Book.fromJson(m)).toList();
+    var ids = dataSource.map((f) => f.Id).toList();
+    books.forEach((f) {
+      if (!ids.contains(f.Id)) {
         dataSource.insert(dataSource.length, f);
       }
     });
- if(mounted){
-   setState(() {
-
-   });
- }
+    if (mounted) {
+      setState(() {});
+    }
     SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
   }
 }

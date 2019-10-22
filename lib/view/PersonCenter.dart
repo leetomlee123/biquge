@@ -6,6 +6,7 @@ import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/event/event.dart';
 import 'package:PureBook/model/ThemeModel.dart';
+import 'package:PureBook/service/TelAndSmsService.dart';
 import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/Forgetpass.dart';
 import 'package:PureBook/view/Register.dart';
@@ -13,6 +14,8 @@ import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../main.dart';
 
 class PersonCenter extends StatefulWidget {
   @override
@@ -144,6 +147,15 @@ class _PersonCenter extends State<PersonCenter>
                   ));
         },
       ),
+          ListTile(
+            leading: CircleAvatar(
+              child: Text('Fe'),
+            ),
+            title: Text('意见反馈'),
+            onTap: () {
+              locator<TelAndSmsService>().sendEmail('leetomlee123@gmail.com');
+            },
+          ),
       ListTile(
         leading: CircleAvatar(
           child: Text('Ab'),
@@ -167,7 +179,7 @@ class _PersonCenter extends State<PersonCenter>
                   ));
         },
       ),
-      MaterialButton(
+     SpUtil.haveKey('login')? MaterialButton(
         child: Text('退出登录'),
         onPressed: () {
           SpUtil.remove('username');
@@ -181,7 +193,7 @@ class _PersonCenter extends State<PersonCenter>
 
           eventBus.fire(new BooksEvent([]));
         },
-      )
+      ):Container()
     ]);
 
     return Scaffold(
@@ -202,7 +214,7 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     login() async {
-      FormData formData = new FormData.fromMap({
+      FormData formData =  FormData.fromMap({
         "password": pwd,
         "username": username,
         "usecookie": 43200,
@@ -281,25 +293,7 @@ class Login extends StatelessWidget {
         child: Text('登陆', style: TextStyle(color: Colors.white)),
       ),
     );
-    final alucard = Hero(
-      tag: 'hero',
-      child: Padding(
-        padding: EdgeInsets.only(top: 10.0),
-        child: CircleAvatar(
-          radius: 72.0,
-          backgroundColor: Colors.transparent,
-          backgroundImage: AssetImage('images/alucard.jpg'),
-        ),
-      ),
-    );
 
-    final welcome = Padding(
-      padding: EdgeInsets.all(2.0),
-      child: Text(
-        '$username',
-        style: TextStyle(fontSize: 28.0, color: Colors.black),
-      ),
-    );
 
     final forgotLabel = FlatButton(
       child: Text(
