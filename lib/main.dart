@@ -25,7 +25,8 @@ MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
 );
 
 BannerAd myBanner = BannerAd(
-  adUnitId: 'ca-app-pub-6006602100377888/8012817232',
+//  adUnitId: 'ca-app-pub-6006602100377888/8012817232',
+adUnitId: BannerAd.testAdUnitId,
   size: AdSize.smartBanner,
   targetingInfo: targetingInfo,
   listener: (MobileAdEvent event) {
@@ -39,7 +40,7 @@ GetIt locator = GetIt.instance;
 void main() async {
   await SpUtil.getInstance();
   await DirectoryUtil.getInstance();
-
+  FirebaseAdMob.instance.initialize(appId: 'ca-app-pub-6006602100377888~3769076624');
   locator.registerSingleton(TelAndSmsService());
   runApp(Store.init(child: MyApp()));
   if (Platform.isAndroid) {
@@ -53,17 +54,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    myBanner
-    // typically this happens well before the ad is shown
-      ..load()
-      ..show(
-        // Positions the banner ad 60 pixels from the bottom of the screen
-        anchorOffset: 60.0,
-        // Positions the banner ad 10 pixels from the center of the screen to the right
-        horizontalCenterOffset: 10.0,
-        // Banner Position
-        anchorType: AnchorType.bottom,
-      );
+//    myBanner
+//    // typically this happens well before the ad is shown
+//      ..load()
+//      ..show(
+//        // Positions the banner ad 60 pixels from the bottom of the screen
+//        anchorOffset: 0.0,
+//        // Positions the banner ad 10 pixels from the center of the screen to the right
+//        horizontalCenterOffset: 0.0,
+//        // Banner Position
+//        anchorType: AnchorType.bottom,
+//      );
     return MaterialApp(
       title: '清阅揽胜',
       theme: Store.value<AppThemeModel>(context).getThemeData(),

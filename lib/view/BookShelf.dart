@@ -65,7 +65,7 @@ class _BookShelfState extends State<BookShelf>
   Widget build(BuildContext context) {
     super.build(context);
     // TODO: implement build
-    return Scaffold(
+    return Container(child: Scaffold(
       appBar: AppBar(
         leading: IconButton(
           color: Store.value<AppThemeModel>(context)
@@ -79,7 +79,7 @@ class _BookShelfState extends State<BookShelf>
             eventBus.fire(new OpenEvent(''));
           },
         ),
-        backgroundColor: Color.fromARGB(1, 245, 245, 245),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           '书架',
@@ -139,13 +139,16 @@ class _BookShelfState extends State<BookShelf>
                   updateBookList(dataSource[i]);
                   Navigator.of(context).push(new MaterialPageRoute(
                       builder: (BuildContext context) =>
-                          new ReadBook(BookInfo.id(temp.Id, temp.Name))));
+                      new ReadBook(BookInfo.id(temp.Id, temp.Name))));
                 },
                 child: getBookItemView(dataSource[i]),
               );
             }),
       ),
-    );
+    ),    decoration: BoxDecoration(
+        image: DecorationImage(
+            image: AssetImage("images/bookshelf_bg.png"),
+            fit: BoxFit.cover)),);
   }
 
 //刷新书架

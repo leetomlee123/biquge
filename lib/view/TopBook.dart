@@ -147,51 +147,50 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                             )
                           ],
                         ),
-                        Expanded(child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 10.0, top: 10.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Text(
+                                        items[i].Name,
+                                        style: TextStyle(fontSize: 15),
+                                      ),
+                                      Expanded(child: Container()),
+                                      Container(
+                                        padding:
+                                            const EdgeInsets.only(right: 15.0),
+                                        child: Text(
+                                          items[i].Score.toString(),
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
+                                    ],
+                                  )),
+                              Container(
                                 padding: const EdgeInsets.only(
                                     left: 10.0, top: 10.0),
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(
-                                      items[i].Name,
-                                      style: TextStyle(fontSize: 15),
-                                    ),
-                                  ],
-                                )),
-                            Container(
-                              padding:
-                                  const EdgeInsets.only(left: 10.0, top: 10.0),
-                              child: new Text('$cate | $auth',
-                                  style: TextStyle(
-                                      fontSize: 14, color: Colors.grey)),
-                            ),
-                            Container(
-                              padding:
-                                  const EdgeInsets.only(left: 10.0, top: 10.0),
-                              child: new Text(items[i].Desc,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.grey)),
-                              width: 270,
-                            ),
-                          ],
+                                child: new Text('$cate | $auth',
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.grey)),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.only(
+                                    left: 10.0, top: 10.0),
+                                child: new Text(items[i].Desc,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.grey)),
+                                width: 270,
+                              ),
+                            ],
+                          ),
                         ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Padding(padding: EdgeInsets.only(right: 20),child:       Text(
-                              items[i].Score.toString(),
-                              style:
-                                  TextStyle(fontSize: 15),
-                            ),),
-                      
-                          ],
-                        )
                       ],
                     ),
                     onTap: () async {

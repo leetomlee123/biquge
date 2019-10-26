@@ -76,80 +76,75 @@ class _BookDetailState extends State<BookDetail>
       ),
       body: Column(
         children: <Widget>[
-          Container(
-            child: Row(children: <Widget>[
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.only(
-                        left: 10.0, top: 10.0, bottom: 10.0),
-                    child: new Image.network(
-                      Common.imgPre + _bookInfo.Img,
-                      height: 100,
-                      width: 80,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                verticalDirection: VerticalDirection.down,
-                // textDirection:,
-                textBaseline: TextBaseline.alphabetic,
 
-                children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.only(left: 20.0, top: 5.0),
-                    child: new Text(
-                      _bookInfo.Name,
-                      style: TextStyle(fontSize: 15),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 20.0, top: 2.0),
-                    child: new Text('作者: ' + _bookInfo.Author,
-                        style: TextStyle(fontSize: 12)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 20.0, top: 2.0),
-                    child: new Text('类型: ' + _bookInfo.CName,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: TextStyle(fontSize: 12)),
-                    width: 270,
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 20.0, top: 2.0),
-                    child: new Text('状态: ' + _bookInfo.BookStatus,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: TextStyle(fontSize: 12)),
-                    width: 270,
-                  ),
-                  Container(
-                      padding: const EdgeInsets.only(
-                          left: 15.0, top: 2.0, bottom: 10.0),
-                      child: Row(
-                        children: <Widget>[
-                          Rating(
-                            initialRating: _bookInfo.BookVote.Score.toInt(),
-                          ),
-                          Text(
-                            '${_bookInfo.BookVote.Score}分',
-                          )
-                        ],
-                      )),
-                ],
-              ),
-            ]),
-          ),
           Expanded(
             child: ListView(
               children: <Widget>[
+                Container(
+                  child: Row(children: <Widget>[
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          padding: const EdgeInsets.only(
+                              left: 10.0, top: 10.0, bottom: 10.0),
+                          child: new Image.network(
+                            Common.imgPre + _bookInfo.Img,
+                            height: 100,
+                            width: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          padding: const EdgeInsets.only(left: 20.0, top: 5.0),
+                          child: new Text(
+                            _bookInfo.Name,
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.only(left: 20.0, top: 2.0),
+                          child: new Text('作者: ' + _bookInfo.Author,
+                              style: TextStyle(fontSize: 12)),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.only(left: 20.0, top: 2.0),
+                          child: new Text('类型: ' + _bookInfo.CName,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style: TextStyle(fontSize: 12)),
+                          width: 270,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.only(left: 20.0, top: 2.0),
+                          child: new Text('状态: ' + _bookInfo.BookStatus,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style: TextStyle(fontSize: 12)),
+                          width: 270,
+                        ),
+                        Container(
+                            padding: const EdgeInsets.only(
+                                left: 15.0, top: 2.0, bottom: 10.0),
+                            child: Row(
+                              children: <Widget>[
+                                Rating(
+                                  initialRating: _bookInfo.BookVote.Score.toInt(),
+                                ),
+                                Text(
+                                  '${_bookInfo.BookVote.Score}分',
+                                )
+                              ],
+                            )),
+                      ],
+                    ),
+                  ]),
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
@@ -283,7 +278,7 @@ class _BookDetailState extends State<BookDetail>
                                 Container(
                                   padding: const EdgeInsets.only(
                                       left: 10.0, top: 10.0),
-                                  child: new Text(
+                                  child:  Text(
                                       _bookInfo.SameUserBooks[i].LastChapter,
                                       style: TextStyle(
                                           color: Colors.grey, fontSize: 11)),

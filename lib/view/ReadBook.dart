@@ -41,6 +41,19 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
   double contentW;
   double fontSize = 25.0;
   MyPageController _pageController;
+  bool showMenu = false;
+  List<List> bgs = [
+    [246, 242, 234],
+    [242, 233, 209],
+    [231, 241, 231],
+    [228, 239, 242],
+    [242, 228, 228],
+    [0, 0, 0]
+  ];
+
+  int bg_i = 0;
+
+
 
   _ReadBookState(this._bookInfo);
 
@@ -54,6 +67,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     super.dispose();
     SpUtil.putString(_bookInfo.Id.toString(), jsonEncode(_bookTag));
     SpUtil.putDouble('fontSize', fontSize);
+    SpUtil.putInt('bg_i', bg_i);
     WidgetsBinding.instance.removeObserver(this);
   }
 
@@ -73,6 +87,9 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     getBookRecord();
     if (SpUtil.haveKey('fontSize')) {
       fontSize = SpUtil.getDouble('fontSize');
+    }
+    if (SpUtil.haveKey('bg_i')) {
+      bg_i = SpUtil.getInt('bg_i');
     }
     var widgetsBinding = WidgetsBinding.instance;
     widgetsBinding.addPostFrameCallback((callback) {
@@ -301,11 +318,11 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
           content = content.substring(1);
         }
         SpUtil.putString(cpt.id.toString(), content);
-//        SpUtil.putString(
-//            'pages' + chapters[i].id.toString(),
-//            ReaderPageAgent.getPageOffsets(
-//                    content, contentH, contentW, fontSize)
-//                .join('-'));
+        SpUtil.putString(
+            'pages' + chapters[i].id.toString(),
+            ReaderPageAgent.getPageOffsets(
+                    content, contentH, contentW, fontSize)
+                .join('-'));
         chapters[i].hasContent = 2;
         print('${chapters[i].name} 下载成功');
       }
@@ -337,9 +354,9 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
       _bookTag.index = temp;
       _pageController.jumpToPage(_bookTag.index);
     } else {
-      int temp = _bookTag.cur + 1;
-      if (temp == chapters.length) {
-        Toast.show('已经是最后一页');
+      int t = _bookTag.cur + 1;
+      if (t == chapters.length) {
+//        Toast.show('已经是最后一页。。。。。。。。。。。。。');
       } else {
         _bookTag.cur += 1;
         _bookTag.index = 0;
@@ -352,252 +369,386 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
 //上一章 下一章
   void changePage(BuildContext context, TapDownDetails details) {
     var wid = MediaQuery.of(context).size.width;
-    var hei = MediaQuery.of(context).size.height;
     var space = wid / 3;
-    var spaceY = hei / 3;
     var curWid = details.localPosition.dx;
-    var curHeg = details.localPosition.dy;
-
     setState(() {
       if (curWid > 0 && curWid < space) {
         prePage();
-      } else if ((curWid > space && curWid < 2 * space) &&
-          (curHeg < 2 * spaceY)) {
+      } else if (curWid > space && curWid < 2 * space) {
         //弹出底部栏
         myshowModalBottomSheet(
-            context: context,
-            elevation: 0,
-            builder: (BuildContext bc) {
-              return StatefulBuilder(
-                builder: (context, state) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 1,
-                          ),
-                          InkWell(
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 50,
-                              child: Text(
-                                "上一章",
-                                maxLines: 1,
-                                style: TextStyle(color: Colors.blue),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            onTap: () {
-                              _bookTag.index = 0;
-                              _bookTag.cur -= 1;
-                              loadChapter(0);
-                            },
-                          ),
-                          Slider(
-                            value: value,
-                            max: (chapters.length - 1).toDouble(),
-                            min: 0.0,
-                            onChanged: (newValue) {
-                              int temp = newValue.round();
-                              _bookTag.cur = temp;
-                              loadChapter(1);
-
-                              state(() {
-                                ///为了区分把setState改个名字
-                                value = _bookTag.cur.toDouble();
-                              });
-                            },
-                            label: '${chapters[_bookTag.cur].name} ',
-                            divisions: chapters.length,
-                            semanticFormatterCallback: (newValue) {
-                              return '${newValue.round()} dollars';
-                            },
-                            activeColor: Colors.lightBlue,
-                            inactiveColor: Colors.grey,
-                          ),
-                          InkWell(
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 50,
-                              child: Text(
-                                "下一章",
-                                maxLines: 1,
-                                style: TextStyle(color: Colors.blue),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            onTap: () {
-                              _bookTag.cur =
-                                  (_bookTag.cur + 1) <= chapters.length - 1
-                                      ? (_bookTag.cur + 1)
-                                      : chapters.length - 1;
-                              _bookTag.index = 0;
-                              loadChapter(1);
-                            },
-                          ),
-                          SizedBox(
-                            width: 1,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 1,
-                          ),
-                          InkWell(
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 50,
-                              child: Text(
-                                "目录",
-                                maxLines: 1,
-                                style: TextStyle(color: Colors.blue),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              _globalKey.currentState.openDrawer();
-                            },
-                          ),
-                          IconButton(
-                            icon: ImageIcon(
-                              AssetImage("images/font_jia.png"),
-                              color: Colors.blue,
-                            ),
-                            onPressed: () async {
-                              state(() {
-                                ///为了区分把setState改个名字
-                                fontSize += 1;
-                              });
-                              setState(() {
-                                _bookTag.index = 0;
-                                _bookTag.pageOffsets =
-                                    ReaderPageAgent.getPageOffsets(
-                                        _bookTag.content,
-                                        contentH,
-                                        contentW,
-                                        fontSize);
-                              });
-//                              changeCachePages();
-                            },
-                          ),
-                          Container(
+          context: context,
+          elevation: 0,
+          builder: (BuildContext bc) {
+            return StatefulBuilder(
+              builder: (context, state) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        SizedBox(
+                          width: 1,
+                        ),
+                        InkWell(
+                          child: Container(
                             alignment: Alignment.center,
                             height: 50,
                             child: Text(
-                              fontSize.toString(),
-                              style: TextStyle(
-                                  color: Colors.blueAccent, fontSize: 17),
+                              "上一章",
+                              maxLines: 1,
+                              style: TextStyle(color: Colors.blue),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          IconButton(
-                            icon: ImageIcon(
-                              AssetImage("images/font_jian.png"),
-                              color: Colors.blue,
+                          onTap: () {
+                            _bookTag.index = 0;
+                            _bookTag.cur -= 1;
+                            loadChapter(0);
+                          },
+                        ),
+                        Slider(
+                          value: value,
+                          max: (chapters.length - 1).toDouble(),
+                          min: 0.0,
+                          onChanged: (newValue) {
+                            int temp = newValue.round();
+                            _bookTag.cur = temp;
+                            loadChapter(1);
+
+                            state(() {
+                              ///为了区分把setState改个名字
+                              value = _bookTag.cur.toDouble();
+                            });
+                          },
+                          label: '${chapters[_bookTag.cur].name} ',
+                          divisions: chapters.length,
+                          semanticFormatterCallback: (newValue) {
+                            return '${newValue.round()} dollars';
+                          },
+                          activeColor: Colors.lightBlue,
+                          inactiveColor: Colors.grey,
+                        ),
+                        InkWell(
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            child: Text(
+                              "下一章",
+                              maxLines: 1,
+                              style: TextStyle(color: Colors.blue),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            onPressed: () async {
-                              state(() {
-                                ///为了区分把setState改个名字
-                                fontSize -= 1;
-                                setState(() {
-                                  _bookTag.index = 0;
-                                  _bookTag.pageOffsets =
-                                      ReaderPageAgent.getPageOffsets(
-                                          _bookTag.content,
-                                          contentH,
-                                          contentW,
-                                          fontSize);
-                                });
-                              });
-//                              changeCachePages();
-                            },
                           ),
-                          InkWell(
-                            child: Container(
-                              alignment: Alignment.center,
-                              height: 50,
-                              child: Text(
-                                "缓存",
-                                maxLines: 1,
-                                style: TextStyle(color: Colors.blue),
-                                overflow: TextOverflow.ellipsis,
+                          onTap: () {
+                            _bookTag.cur =
+                                (_bookTag.cur + 1) <= chapters.length - 1
+                                    ? (_bookTag.cur + 1)
+                                    : chapters.length - 1;
+                            _bookTag.index = 0;
+                            loadChapter(1);
+                          },
+                        ),
+                        SizedBox(
+                          width: 1,
+                        ),
+                      ],
+                    ),
+                    Table(children: <TableRow>[
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(
+                            child: Center(
+                              child: InkWell(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  child: Text(
+                                    "目录",
+                                    maxLines: 1,
+                                    style: TextStyle(color: Colors.blue),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _globalKey.currentState.openDrawer();
+                                },
                               ),
                             ),
-                            onTap: () {
-                              showModalBottomSheet(
-                                  context: context,
-                                  builder: (BuildContext bc) {
-                                    return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: <Widget>[
-                                          InkWell(
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              height: 50,
-                                              child: Text(
-                                                "从当前章节缓存",
-                                                maxLines: 1,
-                                                style: TextStyle(
-                                                    color: Colors.blue),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            onTap: () async {
-                                              justDown(_bookTag.cur,
-                                                  chapters.length);
-
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          InkWell(
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              height: 50,
-                                              child: Text(
-                                                "全本缓存",
-                                                maxLines: 1,
-                                                style: TextStyle(
-                                                    color: Colors.blue),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            onTap: () async {
-                                              justDown(0, chapters.length);
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                        ]);
-                                  });
-                            },
                           ),
-                          SizedBox(
-                            width: 1,
+//                          TableCell(
+//                            child: Center(
+//                              child: InkWell(
+//                                child: Container(
+//                                  alignment: Alignment.center,
+//                                  height: 50,
+//                                  child: Text(
+//                                    '${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? '夜间' : '日间'}',
+//                                    maxLines: 1,
+//                                    style: TextStyle(color: Colors.blue),
+//                                    overflow: TextOverflow.ellipsis,
+//                                  ),
+//                                ),
+//                                onTap: () {
+//                                  state(() {
+//                                    Store.value<AppThemeModel>(context)
+//                                        .setModel(
+//                                            Store.value<AppThemeModel>(context)
+//                                                    .getThemeData()
+//                                                    .brightness ==
+//                                                Brightness.light);
+//                                  });
+//                                  if (Store.value<AppThemeModel>(context)
+//                                          .getThemeData()
+//                                          .brightness ==
+//                                      Brightness.light) {
+//                                    bg_i = pre_bg_i;
+//                                  } else {
+//                                    pre_bg_i = bg_i;
+//                                    bg_i = bgs.length - 1;
+//                                  }
+//                                  setState(() {});
+//                                },
+//                              ),
+//                            ),
+//                          ),
+                          TableCell(
+                            child: Center(
+                              child: InkWell(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  child: Text(
+                                    "缓存",
+                                    maxLines: 1,
+                                    style: TextStyle(color: Colors.blue),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                onTap: () {
+                                  myshowModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext bc) {
+                                        return Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              InkWell(
+                                                child: Container(
+                                                  alignment: Alignment.center,
+                                                  height: 50,
+                                                  child: Text(
+                                                    "从当前章节缓存",
+                                                    maxLines: 1,
+                                                    style: TextStyle(
+                                                        color: Colors.blue),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                onTap: () async {
+                                                  justDown(_bookTag.cur,
+                                                      chapters.length);
+
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                              InkWell(
+                                                child: Container(
+                                                  alignment: Alignment.center,
+                                                  height: 50,
+                                                  child: Text(
+                                                    "全本缓存",
+                                                    maxLines: 1,
+                                                    style: TextStyle(
+                                                        color: Colors.blue),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                onTap: () async {
+                                                  justDown(0, chapters.length);
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                            ]);
+                                      });
+                                },
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: InkWell(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  child: Text(
+                                    "设置",
+                                    maxLines: 1,
+                                    style: TextStyle(color: Colors.blue),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                onTap: () {
+                                  myshowModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext bc) {
+                                        return GestureDetector(child: Column(
+                                          textBaseline: TextBaseline.alphabetic,
+                                          children: <Widget>[
+                                            Table(children: <TableRow>[
+                                              TableRow(
+                                                children: <Widget>[
+                                                  TableCell(
+                                                    child: Center(
+                                                      child: IconButton(
+                                                        icon: ImageIcon(
+                                                          AssetImage(
+                                                              "images/font_jia.png"),
+                                                          color: Colors.blue,
+                                                        ),
+                                                        onPressed: () async {
+                                                          state(() {
+                                                            ///为了区分把setState改个名字
+                                                            fontSize += 1;
+                                                          });
+                                                          setState(() {
+                                                            _bookTag.index = 0;
+                                                            _bookTag.pageOffsets =
+                                                                ReaderPageAgent
+                                                                    .getPageOffsets(
+                                                                    _bookTag
+                                                                        .content,
+                                                                    contentH,
+                                                                    contentW,
+                                                                    fontSize);
+                                                          });
+//                              changeCachePages();
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  TableCell(
+                                                    child: Center(
+                                                      child: Container(
+                                                        alignment:
+                                                        Alignment.center,
+                                                        height: 50,
+                                                        child: Text(
+                                                          fontSize.toString(),
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .blueAccent,
+                                                              fontSize: 17),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  TableCell(
+                                                    child: Center(
+                                                      child: IconButton(
+                                                        icon: ImageIcon(
+                                                          AssetImage(
+                                                              "images/font_jian.png"),
+                                                          color: Colors.blue,
+                                                        ),
+                                                        onPressed: () async {
+                                                          state(() {
+                                                            ///为了区分把setState改个名字
+                                                            fontSize -= 1;
+                                                            setState(() {
+                                                              _bookTag.index =
+                                                              0;
+                                                              _bookTag.pageOffsets =
+                                                                  ReaderPageAgent.getPageOffsets(
+                                                                      _bookTag
+                                                                          .content,
+                                                                      contentH,
+                                                                      contentW,
+                                                                      fontSize);
+                                                            });
+                                                          });
+//                              changeCachePages();
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ]),
+                                            Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                              children: readThemes(),
+                                            )
+                                          ],
+                                          mainAxisSize: MainAxisSize.min,
+                                        ),onTap: (){
+                                          return false;
+                                        },);
+                                      });
+                                },
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                    ],
-                  );
-                },
-              );
-            },);
+                    ]),
+                    SizedBox(
+                      height: 8,
+                    )
+                  ],
+                );
+              },
+            );
+          },
+        );
       } else {
         nextPage();
       }
     });
   }
 
+  List<Widget> readThemes() {
+    List<Widget> wds = [];
+    for (var i = 0; i < bgs.length - 1; i++) {
+      var f = bgs[i];
+      wds.add(RawMaterialButton(
+        onPressed: () {
+          bg_i = i;
+          if (mounted) {
+            setState(() {});
+          }
+        },
+        constraints: BoxConstraints(minWidth: 60.0, minHeight: 50.0),
+        child: Container(
+          margin: EdgeInsets.only(top: 5.0, bottom: 5.0),
+          width: 40.0,
+          height: 40.0,
+          decoration: BoxDecoration(
+              color: Color.fromRGBO(f[0], f[1], f[2], 1),
+              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              border: Border.all(color: Colors.white)),
+        ),
+      ));
+    }
+    wds.add(SizedBox(
+      height: 8,
+    ));
+    return wds;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      backgroundColor: Colors.transparent,
+//      backgroundColor: Colors.transparent,
+
       key: _globalKey,
+      backgroundColor:
+          Color.fromRGBO(bgs[bg_i][0], bgs[bg_i][1], bgs[bg_i][2], 1),
       drawer: Drawer(
         child: ChapterView(
             chapters, _bookInfo.Id.toString(), _bookTag.cur, _bookInfo.Name),
@@ -605,10 +756,10 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
       body: Stack(
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage("images/read_bg.jpg"),
-                    fit: BoxFit.cover)),
+//            decoration: BoxDecoration(
+//                image: DecorationImage(
+//                    image: AssetImage("images/read_bg.jpg"),
+//                    fit: BoxFit.cover)),
             child: MyPageView.builder(
               controller: _pageController,
               physics: AlwaysScrollableScrollPhysics(),
@@ -640,7 +791,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
               children: <Widget>[
                 Text(
                   chapters.length > 0 ? chapters[_bookTag.cur].name : '',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
+                  style: TextStyle(fontSize: 16,color: Colors.black),
                 ),
                 Expanded(child: Container()),
                 Row(
@@ -650,14 +801,14 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                       _bookTag.pageOffsets == null
                           ? ''
                           : '第${_bookTag.index + 1}/${_bookTag.pageOffsets.length}页',
-                      style: TextStyle(fontSize: 13, color: Colors.black),
+                      style: TextStyle(fontSize: 13,color: Colors.black),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -690,8 +841,9 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
               child: Text(
                 content,
                 style: TextStyle(
-                    fontSize: fontSize / Screen.textScaleFactor,
-                    color: Colors.black),
+                  fontSize: fontSize / Screen.textScaleFactor,
+                  color: Colors.black
+                ),
               )),
         ),
       );
@@ -708,5 +860,3 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     }
   }
 }
-
-
