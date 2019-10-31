@@ -9,8 +9,6 @@ import 'package:PureBook/entity/BookTag.dart';
 import 'package:PureBook/entity/Chapter.dart';
 import 'package:PureBook/entity/ChapterList.dart';
 import 'package:PureBook/event/event.dart';
-import 'package:PureBook/model/ThemeModel.dart';
-import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/ChapterView.dart';
 import 'package:PureBook/view/MyBottomSheet.dart';
 import 'package:PureBook/view/MyViewPage.dart';
@@ -28,7 +26,7 @@ class ReadBook extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return new _ReadBookState(_bookInfo);
+    return  _ReadBookState(_bookInfo);
   }
 }
 
@@ -136,7 +134,12 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
       //本书已读过
       setState(() {});
     } else {
-      _bookTag = new BookTag(0, 0, chapters, _bookInfo.Name);
+      if(SpUtil.haveKey('${_bookInfo.Id}chapters')){
+        var string = SpUtil.getString('${_bookInfo.Id}chapters');
+        List v=jsonDecode(string);
+       chapters= v.map((f)=>Chapter.fromJson(f)).toList();
+      }
+      _bookTag =  BookTag(0, 0, chapters, _bookInfo.Name);
       _pageController = MyPageController(initialPage: 0);
     }
   }
@@ -158,10 +161,10 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     //第一次加载章节
     for (var i = 0; i < list.length; i++) {
       //目录名hasContent=0
-      temp.add(new Chapter(0, 0, list[i].name));
+      temp.add(Chapter(0, 0, list[i].name));
       var list2 = list[i].list;
       for (var j = 0; j < list2.length; j++) {
-        temp.add(new Chapter(1, list2[j].id, list2[j].name));
+        temp.add(Chapter(1, list2[j].id, list2[j].name));
       }
     }
     temp.setAll(0, chapters);

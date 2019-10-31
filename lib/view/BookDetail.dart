@@ -6,6 +6,7 @@ import 'package:PureBook/common/toast.dart';
 import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/entity/BookInfo.dart';
+import 'package:PureBook/entity/Chapter.dart';
 import 'package:PureBook/entity/ChapterList.dart';
 import 'package:PureBook/event/event.dart';
 import 'package:PureBook/model/ThemeModel.dart';
@@ -163,7 +164,7 @@ class _BookDetailState extends State<BookDetail>
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 17.0, top: 5.0),
-                      child: new Text(
+                      child:   Text(
                         _bookInfo.Desc,
                         style: TextStyle(fontSize: 12),
                       ),
@@ -196,10 +197,9 @@ class _BookDetailState extends State<BookDetail>
                       onTap: () {
                         _bookInfo.CId = -1;
                         addToShelf();
-                        Navigator.pop(context);
-                        Navigator.of(context).push(new MaterialPageRoute(
+                        Navigator.of(context).push( MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                new ReadBook(_bookInfo)));
+                                 ReadBook(_bookInfo)));
                       },
                     ),
                   ],
@@ -291,15 +291,12 @@ class _BookDetailState extends State<BookDetail>
                       onTap: () async {
                         String url =
                             'https://shuapi.jiaston.com/info/${_bookInfo.SameUserBooks[i].Id}.html';
-
                         Response future = await Util(context).http().get(url);
-                        Navigator.pop(context);
                         var data = jsonDecode(future.data)['data'];
-                        BookInfo bookInfo = new BookInfo.fromJson(data);
-
+                        BookInfo bookInfo =  BookInfo.fromJson(data);
                         Navigator.of(context).push(new MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                new BookDetail(bookInfo)));
+                                 BookDetail(bookInfo)));
                       },
                     );
                   },
@@ -356,7 +353,6 @@ class _BookDetailState extends State<BookDetail>
             case 1:
               {
                 addToShelf();
-                Navigator.pop(context);
                 Navigator.of(context).push(new MaterialPageRoute(
                     builder: (BuildContext context) =>
                         new ReadBook(_bookInfo)));
@@ -435,10 +431,11 @@ class _BookDetailState extends State<BookDetail>
     String replace = data.replaceAll('},]', '}]');
     var jsonDecode3 = jsonDecode(replace)['data'];
     List jsonDecode2 = jsonDecode3['list'];
-
-    var list = jsonDecode2.map((m) => new ChapterList.fromJson(m)).toList();
+    List<Chapter> temp = [];
+    var list = jsonDecode2.map((m) =>  ChapterList.fromJson(m)).toList();
     for (var i = 0; i < list.length; i++) {
       var list2 = list[i].list;
+      temp.add(Chapter(0, 0, list[i].name));
       for (var j = 0; j < list2.length;) {
         var cpt = list2[j];
         if ((!SpUtil.haveKey(cpt.id.toString())) && cpt.hasContent != 0) {
@@ -460,12 +457,13 @@ class _BookDetailState extends State<BookDetail>
             content = content.substring(1);
           }
           SpUtil.putString(cpt.id.toString(), content);
-          cpt.hasContent = 2;
+          temp.add(Chapter(2, list2[j].id, list2[j].name));
           print('${cpt.name} 下载成功');
         }
         j++;
       }
     }
+    SpUtil.putString('${_bookInfo.Id}chapters', jsonEncode(temp));
   }
 
   @override
