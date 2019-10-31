@@ -26,7 +26,7 @@ class ReadBook extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return  _ReadBookState(_bookInfo);
+    return _ReadBookState(_bookInfo);
   }
 }
 
@@ -37,7 +37,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
   String content = '';
   double contentH;
   double contentW;
-  double fontSize = 25.0;
+  double fontSize = 27.0;
   MyPageController _pageController;
   bool showMenu = false;
   List<List> bgs = [
@@ -50,8 +50,6 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
   ];
 
   int bg_i = 0;
-
-
 
   _ReadBookState(this._bookInfo);
 
@@ -134,12 +132,12 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
       //本书已读过
       setState(() {});
     } else {
-      if(SpUtil.haveKey('${_bookInfo.Id}chapters')){
+      if (SpUtil.haveKey('${_bookInfo.Id}chapters')) {
         var string = SpUtil.getString('${_bookInfo.Id}chapters');
-        List v=jsonDecode(string);
-       chapters= v.map((f)=>Chapter.fromJson(f)).toList();
+        List v = jsonDecode(string);
+        chapters = v.map((f) => Chapter.fromJson(f)).toList();
       }
-      _bookTag =  BookTag(0, 0, chapters, _bookInfo.Name);
+      _bookTag = BookTag(0, 0, chapters, _bookInfo.Name);
       _pageController = MyPageController(initialPage: 0);
     }
   }
@@ -595,10 +593,10 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                   ),
                                 ),
                                 onTap: () {
-                                  myshowModalBottomSheet(
+                                  Future<void> future = myshowModalBottomSheet(
                                       context: context,
                                       builder: (BuildContext bc) {
-                                        return GestureDetector(child: Column(
+                                        return Column(
                                           textBaseline: TextBaseline.alphabetic,
                                           children: <Widget>[
                                             Table(children: <TableRow>[
@@ -622,33 +620,18 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                             _bookTag.pageOffsets =
                                                                 ReaderPageAgent
                                                                     .getPageOffsets(
-                                                                    _bookTag
-                                                                        .content,
-                                                                    contentH,
-                                                                    contentW,
-                                                                    fontSize);
+                                                                        _bookTag
+                                                                            .content,
+                                                                        contentH,
+                                                                        contentW,
+                                                                        fontSize);
                                                           });
 //                              changeCachePages();
                                                         },
                                                       ),
                                                     ),
                                                   ),
-                                                  TableCell(
-                                                    child: Center(
-                                                      child: Container(
-                                                        alignment:
-                                                        Alignment.center,
-                                                        height: 50,
-                                                        child: Text(
-                                                          fontSize.toString(),
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .blueAccent,
-                                                              fontSize: 17),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
+
                                                   TableCell(
                                                     child: Center(
                                                       child: IconButton(
@@ -663,7 +646,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                             fontSize -= 1;
                                                             setState(() {
                                                               _bookTag.index =
-                                                              0;
+                                                                  0;
                                                               _bookTag.pageOffsets =
                                                                   ReaderPageAgent.getPageOffsets(
                                                                       _bookTag
@@ -683,15 +666,16 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                             ]),
                                             Row(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                                  MainAxisAlignment.spaceAround,
                                               children: readThemes(),
                                             )
                                           ],
                                           mainAxisSize: MainAxisSize.min,
-                                        ),onTap: (){
-                                          return false;
-                                        },);
+                                        );
                                       });
+                                  future.then((void value) async {
+                                    reCalcPages();
+                                  });
                                 },
                               ),
                             ),
@@ -710,6 +694,14 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
         );
       } else {
         nextPage();
+      }
+    });
+  }
+
+  reCalcPages() {
+    SpUtil.getKeys().forEach((f) {
+      if (f.startsWith('pages')) {
+        SpUtil.remove(f);
       }
     });
   }
@@ -759,10 +751,10 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
       body: Stack(
         children: <Widget>[
           Container(
-//            decoration: BoxDecoration(
-//                image: DecorationImage(
-//                    image: AssetImage("images/read_bg.jpg"),
-//                    fit: BoxFit.cover)),
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("images/read_bg.jpg"),
+                    fit: BoxFit.cover)),
             child: MyPageView.builder(
               controller: _pageController,
               physics: AlwaysScrollableScrollPhysics(),
@@ -794,7 +786,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
               children: <Widget>[
                 Text(
                   chapters.length > 0 ? chapters[_bookTag.cur].name : '',
-                  style: TextStyle(fontSize: 16,color: Colors.black),
+                  style: TextStyle(fontSize: 16, color: Colors.black),
                 ),
                 Expanded(child: Container()),
                 Row(
@@ -804,7 +796,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                       _bookTag.pageOffsets == null
                           ? ''
                           : '第${_bookTag.index + 1}/${_bookTag.pageOffsets.length}页',
-                      style: TextStyle(fontSize: 13,color: Colors.black),
+                      style: TextStyle(fontSize: 13, color: Colors.black),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -844,9 +836,8 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
               child: Text(
                 content,
                 style: TextStyle(
-                  fontSize: fontSize / Screen.textScaleFactor,
-                  color: Colors.black
-                ),
+                    fontSize: fontSize / Screen.textScaleFactor,
+                    color: Colors.black),
               )),
         ),
       );
