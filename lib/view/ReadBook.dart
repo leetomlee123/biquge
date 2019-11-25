@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:PureBook/common/ReaderPageAgent.dart';
@@ -549,10 +550,10 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                         TextOverflow.ellipsis,
                                                   ),
                                                 ),
-                                                onTap: () async {
-                                                  justDown(_bookTag.cur,
-                                                      chapters.length);
-
+                                                onTap: () {
+                                                  scheduleMicrotask(justDown(
+                                                      _bookTag.cur,
+                                                      chapters.length));
                                                   Navigator.pop(context);
                                                 },
                                               ),
@@ -569,8 +570,9 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                         TextOverflow.ellipsis,
                                                   ),
                                                 ),
-                                                onTap: () async {
-                                                  justDown(0, chapters.length);
+                                                onTap: () {
+                                                  scheduleMicrotask(justDown(
+                                                      0, chapters.length));
                                                   Navigator.pop(context);
                                                 },
                                               ),
@@ -632,7 +634,6 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                       ),
                                                     ),
                                                   ),
-
                                                   TableCell(
                                                     child: Center(
                                                       child: IconButton(
@@ -698,13 +699,16 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                   String url =
                                       'https://shuapi.jiaston.com/info/${_bookInfo.Id}.html';
 
-                                  Response future = await Util(context).http().get(url);
+                                  Response future =
+                                      await Util(context).http().get(url);
 
                                   var data = jsonDecode(future.data)['data'];
-                                  BookInfo bookInfo = new BookInfo.fromJson(data);
-                                  Navigator.of(context).push(new MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                       BookDetail(bookInfo)));
+                                  BookInfo bookInfo =
+                                      new BookInfo.fromJson(data);
+                                  Navigator.of(context).push(
+                                      new MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              BookDetail(bookInfo)));
                                 },
                               ),
                             ),

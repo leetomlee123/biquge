@@ -7,32 +7,14 @@ import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/BookShelf.dart';
 import 'package:PureBook/view/PersonCenter.dart';
 import 'package:PureBook/view/TopBook.dart';
-import 'package:firebase_admob/firebase_admob.dart';
+
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
 import 'event/event.dart';
-MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
-  keywords: <String>['games', 'pubg'],
-  contentUrl: 'https://flutter.cn',
-  birthday: DateTime.now(),
-  childDirected: false,
-  designedForFamilies: false,
-  gender: MobileAdGender.male, // or MobileAdGender.female, MobileAdGender.unknown
-  testDevices: <String>[], // Android emulators are considered test devices
-);
 
-BannerAd myBanner = BannerAd(
-//  adUnitId: 'ca-app-pub-6006602100377888/8012817232',
-adUnitId: BannerAd.testAdUnitId,
-  size: AdSize.smartBanner,
-  targetingInfo: targetingInfo,
-  listener: (MobileAdEvent event) {
-    print("BannerAd event is $event");
-  },
-);
 //ca-app-pub-6006602100377888~3769076624
 //ca-app-pub-6006602100377888/8012817232
 List<Book> books = [];
@@ -40,7 +22,7 @@ GetIt locator = GetIt.instance;
 void main() async {
   await SpUtil.getInstance();
   await DirectoryUtil.getInstance();
-  FirebaseAdMob.instance.initialize(appId: 'ca-app-pub-6006602100377888~3769076624');
+
   locator.registerSingleton(TelAndSmsService());
   runApp(Store.init(child: MyApp()));
   if (Platform.isAndroid) {

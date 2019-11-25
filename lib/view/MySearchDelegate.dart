@@ -4,9 +4,6 @@
 
 import 'dart:async';
 
-import 'package:PureBook/model/SearchModel.dart';
-import 'package:PureBook/store/Store.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -398,8 +395,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   // This node is owned, but not hosted by, the search page. Hosting is done by
   // the text field.
   FocusNode focusNode = FocusNode();
-  BannerAd _myBanner;
-  MobileAdTargetingInfo _targetingInfo;
+
   @override
   void initState() {
     super.initState();
@@ -408,30 +404,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
     focusNode.addListener(_onFocusChanged);
     widget.delegate._focusNode = focusNode;
-    _targetingInfo= MobileAdTargetingInfo(
-      keywords: <String>['games', 'pubg'],
-      contentUrl: 'https://flutter.cn',
-
-      childDirected: true,
-      // or MobileAdGender.female, MobileAdGender.unknown
-      testDevices: <String>[],
-      // Android emulators are considered test devices
-    );
-    _myBanner=BannerAd(
-      // Replace the testAdUnitId with an ad unit id from the AdMob dash.
-      // https://developers.google.com/admob/android/test-ads
-      // https://developers.google.com/admob/ios/test-ads
-      adUnitId: 'ca-app-pub-6006602100377888/6756340222',
-      size: AdSize.smartBanner,
-      targetingInfo: _targetingInfo,
-      listener: (MobileAdEvent event) {
-        print("BannerAd event is $event");
-      },
-    );
-    FirebaseAdMob.instance
-        .initialize(appId: "ca-app-pub-6006602100377888~3769076624").then((res){
-      _myBanner..load()..show();
-    });
   }
 
   @override
@@ -442,7 +414,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
     widget.delegate._focusNode = null;
     focusNode.dispose();
-    _myBanner.dispose();
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
@@ -490,7 +461,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
 
   @override
   Widget build(BuildContext context) {
-
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel ??
@@ -529,7 +499,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           elevation: 0,
-
           leading: widget.delegate.buildLeading(context),
           title: TextField(
             controller: widget.delegate._queryTextController,
@@ -539,8 +508,6 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
-
-
             },
             decoration: InputDecoration(
               border: InputBorder.none,

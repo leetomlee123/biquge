@@ -211,13 +211,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-  firebase_admob:
-    dependency: "direct main"
-    description:
-      name: firebase_admob
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.9.0+9"
   fixnum:
     dependency: transitive
     description:
@@ -341,7 +334,7 @@ packages:
     source: hosted
     version: "0.6.1+1"
   json_annotation:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: json_annotation
       url: "https://pub.dartlang.org"
@@ -439,7 +432,7 @@ packages:
     source: hosted
     version: "1.8.0+1"
   permission_handler:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: permission_handler
       url: "https://pub.dartlang.org"
