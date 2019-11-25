@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
 //        anchorType: AnchorType.bottom,
 //      );
     return MaterialApp(
-      title: '清阅揽胜',
+      title: '清阅',
       theme: Store.value<AppThemeModel>(context).getThemeData(),
       home: MainPage(),
     );
@@ -87,14 +87,14 @@ class _MainPageState extends State<MainPage> {
         icon: ImageIcon(
           AssetImage("images/shelf.png"),
         ),
-        title: new Text(
+        title:  Text(
           '书架',
         )),
     BottomNavigationBarItem(
         icon: ImageIcon(
           AssetImage("images/rank.png"),
         ),
-        title: new Text(
+        title:  Text(
           '排行榜',
         )),
   ];
@@ -103,8 +103,8 @@ class _MainPageState extends State<MainPage> {
    * 存储的四个页面，和Fragment一样
    */
   var _pages = [
-    new BookShelf(),
-    new TopBook(),
+     BookShelf(),
+     TopBook(),
   ];
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 

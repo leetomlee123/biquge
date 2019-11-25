@@ -46,8 +46,11 @@ class _PersonCenter extends State<PersonCenter>
             backgroundImage: AssetImage("images/fu.png"),
           ),
           onTap: () {
-            Navigator.of(context).push(new MaterialPageRoute(
-                builder: (BuildContext context) => Login()));
+            if(!SpUtil.haveKey('email')) {
+            Navigator.of(context).push( MaterialPageRoute(
+            builder: (BuildContext context) => Login()));
+            }
+
           },
         ),
       ),
@@ -100,7 +103,7 @@ class _PersonCenter extends State<PersonCenter>
                     ),
                     actions: <Widget>[
                       FlatButton(
-                        child: new Text("确定"),
+                        child:  Text("确定"),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
@@ -167,7 +170,7 @@ class _PersonCenter extends State<PersonCenter>
               builder: (context) => AlertDialog(
                     title: Text(('清阅揽胜  ')),
                     content: Text(
-                        '清澈阅读 悦己及人\n\n世人为荣利缠缚，动曰尘世苦海，不知云白山青，川行石立，花迎鸟笑，谷答樵讴，世亦不尘、海亦不苦、彼自尘苦其心尔'),
+                        '世人为荣利缠缚，动曰尘世苦海，不知云白山青，川行石立，花迎鸟笑，谷答樵讴，世亦不尘、海亦不苦、彼自尘苦其心尔'),
                     actions: <Widget>[
                       FlatButton(
                         child: new Text("确定"),

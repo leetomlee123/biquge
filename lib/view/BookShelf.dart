@@ -17,6 +17,7 @@ import 'package:dio/dio.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 var map = {0: "我的书架", 1: "排行榜", 2: "我的"};
@@ -65,90 +66,92 @@ class _BookShelfState extends State<BookShelf>
   Widget build(BuildContext context) {
     super.build(context);
     // TODO: implement build
-    return Container(child: Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          color: Store.value<AppThemeModel>(context)
-              .getThemeData()
-              .iconTheme
-              .color,
-          icon: ImageIcon(
-            AssetImage("images/account.png"),
+    return Container(
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            color: Store.value<AppThemeModel>(context)
+                .getThemeData()
+                .iconTheme
+                .color,
+            icon: ImageIcon(
+              AssetImage("images/account.png"),
+            ),
+            onPressed: () {
+              eventBus.fire(new OpenEvent(''));
+            },
           ),
-          onPressed: () {
-            eventBus.fire(new OpenEvent(''));
-          },
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(
+            '书架',
+            style: TextStyle(
+                fontSize: 18,
+                color: Store.value<AppThemeModel>(context)
+                    .getThemeData()
+                    .iconTheme
+                    .color),
+          ),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(Icons.search),
+                color: Store.value<AppThemeModel>(context)
+                    .getThemeData()
+                    .iconTheme
+                    .color,
+                tooltip: '搜索小说',
+                onPressed: () {
+                  myshowSearch(context: context, delegate: SearchBarDelegate());
+                }),
+          ],
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          '书架',
-          style: TextStyle(
-              fontSize: 18,
-              color: Store.value<AppThemeModel>(context)
-                  .getThemeData()
-                  .iconTheme
-                  .color),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.search),
-              color: Store.value<AppThemeModel>(context)
-                  .getThemeData()
-                  .iconTheme
-                  .color,
-              tooltip: '搜索小说',
-              onPressed: () {
-                myshowSearch(context: context, delegate: SearchBarDelegate());
-              }),
-        ],
-      ),
-      body: SmartRefresher(
-        enablePullDown: true,
-        header: WaterDropHeader(),
-        footer: CustomFooter(
-          builder: (BuildContext context, LoadStatus mode) {
-            if (mode == LoadStatus.idle) {
-            } else if (mode == LoadStatus.loading) {
-              body = CupertinoActivityIndicator();
-            } else if (mode == LoadStatus.failed) {
-              body = Text("加载失败！点击重试！");
-            } else if (mode == LoadStatus.canLoading) {
-              body = Text("松手,加载更多!");
-            } else {
-              body = Text("到底了!");
-            }
-            return Center(
-              child: body,
-            );
-          },
-        ),
-        controller: _refreshController,
-        onRefresh: freshShelf,
-        child: ListView.builder(
-            itemCount: dataSource.length,
-            itemBuilder: (context, i) {
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    dataSource[i].NewChapterCount = 0;
-                  });
-                  Book temp = dataSource[i];
-                  updateBookList(dataSource[i]);
-                  Navigator.of(context).push(new MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                      new ReadBook(BookInfo.id(temp.Id, temp.Name))));
-                },
-                child: getBookItemView(dataSource[i]),
+        body: SmartRefresher(
+          enablePullDown: true,
+          header: WaterDropHeader(),
+          footer: CustomFooter(
+            builder: (BuildContext context, LoadStatus mode) {
+              if (mode == LoadStatus.idle) {
+              } else if (mode == LoadStatus.loading) {
+                body = CupertinoActivityIndicator();
+              } else if (mode == LoadStatus.failed) {
+                body = Text("加载失败！点击重试！");
+              } else if (mode == LoadStatus.canLoading) {
+                body = Text("松手,加载更多!");
+              } else {
+                body = Text("到底了!");
+              }
+              return Center(
+                child: body,
               );
-            }),
+            },
+          ),
+          controller: _refreshController,
+          onRefresh: freshShelf,
+          child: ListView.builder(
+              itemCount: dataSource.length,
+              itemBuilder: (context, i) {
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    setState(() {
+                      dataSource[i].NewChapterCount = 0;
+                    });
+                    Book temp = dataSource[i];
+                    updateBookList(dataSource[i]);
+                    Navigator.of(context).push(new MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            ReadBook(BookInfo.id(temp.Id, temp.Name))));
+                  },
+                  child: getBookItemView(dataSource[i]),
+                );
+              }),
+        ),
       ),
-    ),    decoration: BoxDecoration(
-        image: DecorationImage(
-            image: AssetImage("images/bookshelf_bg.png"),
-            fit: BoxFit.cover)),);
+      decoration: BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage("images/bookshelf_bg.png"), fit: BoxFit.cover)),
+    );
   }
 
 //刷新书架
@@ -192,8 +195,10 @@ class _BookShelfState extends State<BookShelf>
   }
 
   getBookItemView(Book item) {
-    return Dismissible(
-      key: Key(item.Id.toString()),
+    return Slidable(
+      actionPane: SlidableScrollActionPane(),
+      //滑出选项的面板 动画
+      actionExtentRatio: 0.25,
       child: Container(
         child: Row(
           children: <Widget>[
@@ -212,8 +217,8 @@ class _BookShelfState extends State<BookShelf>
                       ),
                       item.NewChapterCount == 1
                           ? Container(
-                        height: 100,
-                        width: 80,
+                              height: 100,
+                              width: 80,
                               child: Align(
                                 alignment: Alignment.topRight,
                                 child: Image.asset(
@@ -257,73 +262,310 @@ class _BookShelfState extends State<BookShelf>
           ],
         ),
       ),
-      onDismissed: (direction) {
-        for (var i = 0; i < dataSource.length; i++) {
-          if (dataSource[i].Id == item.Id) {
-            dataSource.removeAt(i);
-            if (mounted) {
-              setState(() {});
+      actions: <Widget>[
+        //左侧按钮列表
+      ],
+      secondaryActions: <Widget>[
+        //右侧按钮列表
+        IconSlideAction(
+          caption: '删除',
+          color: Colors.red,
+          icon: Icons.delete,
+          closeOnTap: true,
+          onTap: () {
+            for (var i = 0; i < dataSource.length; i++) {
+              if (dataSource[i].Id == item.Id) {
+                dataSource.removeAt(i);
+                if (mounted) {
+                  setState(() {});
+                }
+                SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
+                Util(null).delLocalCache([item.Id.toString()]);
+                break;
+              }
             }
-            SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
-            Util(null).delLocalCache([item.Id.toString()]);
-            break;
-          }
-        }
-        Util(null).http().post(Common.bookAction,
-            data: {'bookIds': item.Id, 'action': 'removebookcase'}).then((v) {
-          Toast.show('删除成功');
-        });
-      },
-      background: Container(
-        color: Colors.green,
-        // 这里使用 ListTile 因为可以快速设置左右两端的Icon
-        child: ListTile(
-          leading: Icon(
-            Icons.bookmark,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      secondaryBackground: Container(
-        color: Colors.red,
-        // 这里使用 ListTile 因为可以快速设置左右两端的Icon
-        child: ListTile(
-          trailing: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      confirmDismiss: (direction) async {
-        var _confirmContent;
-
-        var _alertDialog;
-
-        if (direction == DismissDirection.endToStart) {
-          // 从右向左  也就是删除
-          _confirmContent = '确认删除     ${item.Name}';
-          _alertDialog = _createDialog(
-            _confirmContent,
-            () {
-              // 展示 SnackBar
-              Navigator.of(context).pop(true);
-            },
-            () {
-              Navigator.of(context).pop(false);
-            },
-          );
-        } else {
-          return false;
-        }
-        var isDismiss = await showDialog(
-            context: context,
-            builder: (context) {
-              return _alertDialog;
+            Util(null).http().post(Common.bookAction, data: {
+              'bookIds': item.Id,
+              'action': 'removebookcase'
+            }).then((v) {
+              Toast.show('删除成功');
             });
-        return isDismiss;
-      },
+          },
+        ),
+        IconSlideAction(
+          caption: '取消',
+          color: Colors.green,
+          icon: Icons.cancel,
+          onTap: () => {},
+        ),
+      ],
     );
+//    return Dismissible(
+//      key: Key(item.Id.toString()),
+//      child: Container(
+//        child: Row(
+//          children: <Widget>[
+//            Column(
+//              mainAxisAlignment: MainAxisAlignment.start,
+//              children: <Widget>[
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+//                  child: Stack(
+//                    children: <Widget>[
+//                      CachedNetworkImage(
+//                        imageUrl: Common.imgPre + item.Img,
+//                        height: 100,
+//                        width: 80,
+//                        fit: BoxFit.cover,
+//                      ),
+//                      item.NewChapterCount == 1
+//                          ? Container(
+//                              height: 100,
+//                              width: 80,
+//                              child: Align(
+//                                alignment: Alignment.topRight,
+//                                child: Image.asset(
+//                                  'images/h6.png',
+//                                  width: 30,
+//                                  height: 30,
+//                                ),
+//                              ),
+//                            )
+//                          : Container(),
+//                    ],
+//                  ),
+//                )
+//              ],
+//            ),
+//            Column(
+//              crossAxisAlignment: CrossAxisAlignment.start,
+//              children: <Widget>[
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+//                  child: Text(
+//                    item.Name,
+//                    style: TextStyle(fontSize: 16.0),
+//                  ),
+//                ),
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 5.0),
+//                  child: Text(
+//                    item.LastChapter,
+//                    style: TextStyle(fontSize: 12),
+//                    overflow: TextOverflow.ellipsis,
+//                  ),
+//                ),
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+//                  child: Text(item.UpdateTime,
+//                      style: TextStyle(color: Colors.grey, fontSize: 11)),
+//                ),
+//              ],
+//            ),
+//          ],
+//        ),
+//      ),
+//      onDismissed: (direction) {
+//        for (var i = 0; i < dataSource.length; i++) {
+//          if (dataSource[i].Id == item.Id) {
+//            dataSource.removeAt(i);
+//            if (mounted) {
+//              setState(() {});
+//            }
+//            SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
+//            Util(null).delLocalCache([item.Id.toString()]);
+//            break;
+//          }
+//        }
+//        Util(null).http().post(Common.bookAction,
+//            data: {'bookIds': item.Id, 'action': 'removebookcase'}).then((v) {
+//          Toast.show('删除成功');
+//        });
+//      },
+//      background: Container(
+//        color: Colors.green,
+//        // 这里使用 ListTile 因为可以快速设置左右两端的Icon
+//        child: ListTile(
+//          leading: Icon(
+//            Icons.bookmark,
+//            color: Colors.white,
+//          ),
+//        ),
+//      ),
+//      secondaryBackground: Container(
+//        color: Colors.red,
+//        // 这里使用 ListTile 因为可以快速设置左右两端的Icon
+//        child: ListTile(
+//          trailing: Icon(
+//            Icons.delete,
+//            color: Colors.white,
+//          ),
+//        ),
+//      ),
+//      confirmDismiss: (direction) async {
+//        var _confirmContent;
+//
+//        var _alertDialog;
+//
+//        if (direction == DismissDirection.endToStart) {
+//          // 从右向左  也就是删除
+//          _confirmContent = '确认删除     ${item.Name}';
+//          _alertDialog = _createDialog(
+//            _confirmContent,
+//            () {
+//              // 展示 SnackBar
+//              Navigator.of(context).pop(true);
+//            },
+//            () {
+//              Navigator.of(context).pop(false);
+//            },
+//          );
+//        } else {
+//          return false;
+//        }
+//        var isDismiss = await showDialog(
+//            context: context,
+//            builder: (context) {
+//              return _alertDialog;
+//            });
+//        return isDismiss;
+//      },
+//    );
   }
+
+//  getBookItemView(Book item) {
+//    return Dismissible(
+//      key: Key(item.Id.toString()),
+//      child: Container(
+//        child: Row(
+//          children: <Widget>[
+//            Column(
+//              mainAxisAlignment: MainAxisAlignment.start,
+//              children: <Widget>[
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+//                  child: Stack(
+//                    children: <Widget>[
+//                      CachedNetworkImage(
+//                        imageUrl: Common.imgPre + item.Img,
+//                        height: 100,
+//                        width: 80,
+//                        fit: BoxFit.cover,
+//                      ),
+//                      item.NewChapterCount == 1
+//                          ? Container(
+//                        height: 100,
+//                        width: 80,
+//                              child: Align(
+//                                alignment: Alignment.topRight,
+//                                child: Image.asset(
+//                                  'images/h6.png',
+//                                  width: 30,
+//                                  height: 30,
+//                                ),
+//                              ),
+//                            )
+//                          : Container(),
+//                    ],
+//                  ),
+//                )
+//              ],
+//            ),
+//            Column(
+//              crossAxisAlignment: CrossAxisAlignment.start,
+//              children: <Widget>[
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+//                  child: Text(
+//                    item.Name,
+//                    style: TextStyle(fontSize: 16.0),
+//                  ),
+//                ),
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 5.0),
+//                  child: Text(
+//                    item.LastChapter,
+//                    style: TextStyle(fontSize: 12),
+//                    overflow: TextOverflow.ellipsis,
+//                  ),
+//                ),
+//                Container(
+//                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+//                  child: Text(item.UpdateTime,
+//                      style: TextStyle(color: Colors.grey, fontSize: 11)),
+//                ),
+//              ],
+//            ),
+//          ],
+//        ),
+//      ),
+//      onDismissed: (direction) {
+//        for (var i = 0; i < dataSource.length; i++) {
+//          if (dataSource[i].Id == item.Id) {
+//            dataSource.removeAt(i);
+//            if (mounted) {
+//              setState(() {});
+//            }
+//            SpUtil.putString(Common.listbookname, jsonEncode(dataSource));
+//            Util(null).delLocalCache([item.Id.toString()]);
+//            break;
+//          }
+//        }
+//        Util(null).http().post(Common.bookAction,
+//            data: {'bookIds': item.Id, 'action': 'removebookcase'}).then((v) {
+//          Toast.show('删除成功');
+//        });
+//      },
+//      background: Container(
+//        color: Colors.green,
+//        // 这里使用 ListTile 因为可以快速设置左右两端的Icon
+//        child: ListTile(
+//          leading: Icon(
+//            Icons.bookmark,
+//            color: Colors.white,
+//          ),
+//        ),
+//      ),
+//      secondaryBackground: Container(
+//        color: Colors.red,
+//        // 这里使用 ListTile 因为可以快速设置左右两端的Icon
+//        child: ListTile(
+//          trailing: Icon(
+//            Icons.delete,
+//            color: Colors.white,
+//          ),
+//        ),
+//      ),
+//      confirmDismiss: (direction) async {
+//        var _confirmContent;
+//
+//        var _alertDialog;
+//
+//        if (direction == DismissDirection.endToStart) {
+//          // 从右向左  也就是删除
+//          _confirmContent = '确认删除     ${item.Name}';
+//          _alertDialog = _createDialog(
+//            _confirmContent,
+//            () {
+//              // 展示 SnackBar
+//              Navigator.of(context).pop(true);
+//            },
+//            () {
+//              Navigator.of(context).pop(false);
+//            },
+//          );
+//        } else {
+//          return false;
+//        }
+//        var isDismiss = await showDialog(
+//            context: context,
+//            builder: (context) {
+//              return _alertDialog;
+//            });
+//        return isDismiss;
+//      },
+//    );
+//  }
 
   Widget _createDialog(
       String _confirmContent, Function sureFunction, Function cancelFunction) {

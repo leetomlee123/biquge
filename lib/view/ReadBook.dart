@@ -9,6 +9,7 @@ import 'package:PureBook/entity/BookTag.dart';
 import 'package:PureBook/entity/Chapter.dart';
 import 'package:PureBook/entity/ChapterList.dart';
 import 'package:PureBook/event/event.dart';
+import 'package:PureBook/view/BookDetail.dart';
 import 'package:PureBook/view/ChapterView.dart';
 import 'package:PureBook/view/MyBottomSheet.dart';
 import 'package:PureBook/view/MyViewPage.dart';
@@ -676,6 +677,34 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                   future.then((void value) async {
                                     reCalcPages();
                                   });
+                                },
+                              ),
+                            ),
+                          ),
+                          TableCell(
+                            child: Center(
+                              child: InkWell(
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  child: Text(
+                                    "详情",
+                                    maxLines: 1,
+                                    style: TextStyle(color: Colors.blue),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                onTap: () async {
+                                  String url =
+                                      'https://shuapi.jiaston.com/info/${_bookInfo.Id}.html';
+
+                                  Response future = await Util(context).http().get(url);
+
+                                  var data = jsonDecode(future.data)['data'];
+                                  BookInfo bookInfo = new BookInfo.fromJson(data);
+                                  Navigator.of(context).push(new MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                       BookDetail(bookInfo)));
                                 },
                               ),
                             ),
