@@ -2,38 +2,40 @@ import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 
 class SearchModel with ChangeNotifier {
-  List<String> _history = [];
+  List<String> searchHistory = new List();
 
-String _query='';
 
-  String get query => _query;
 
-  setQuery(String value) {
-    _query = value;
+
+  setHistory(String value) {
+
+    for (var ii = 0; ii < searchHistory.length; ii++) {
+      if (searchHistory[ii] == value) {
+        searchHistory.removeAt(ii);
+      }
+    }
+    searchHistory.insert(0, value);
+
+    SpUtil.putStringList('history', searchHistory);
   }
 
-  List<String> get history => _history;
-
-   setHistory(List<String> value) {
-    _history = value;
-  }
-
-  show() {
-    _history = SpUtil.getStringList('history');
-    notifyListeners();
+  getHistory() {
+    if(SpUtil.haveKey('history')){
+      searchHistory = SpUtil.getStringList('history');
+    }
+    return searchHistory;
   }
 
   clearHistory() {
     SpUtil.remove('history');
-    _history = [];
+    searchHistory = [];
     notifyListeners();
   }
-
-
 
   @override
   void dispose() {
     super.dispose();
-    SpUtil.putStringList('history', _history);
+
+    SpUtil.putStringList('history', searchHistory);
   }
 }

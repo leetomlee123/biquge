@@ -200,6 +200,7 @@ class _PersonCenter extends State<PersonCenter>
     ]);
 
     return Scaffold(
+
       body: personbody,
     );
   }

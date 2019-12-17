@@ -109,6 +109,7 @@ class _MainPageState extends State<MainPage> {
             itemBuilder: (context, index) => _pages[index]),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        elevation: 0,
         items: bottoms,
         type: BottomNavigationBarType.fixed,
         currentIndex: _tabIndex,

@@ -186,7 +186,7 @@ abstract class MySearchDelegate<T> {
     return theme.copyWith(
       primaryColor: Colors.white,
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
-      primaryColorBrightness: Brightness.light,
+      primaryColorBrightness: Brightness.dark,
       primaryTextTheme: theme.textTheme,
     );
   }
@@ -497,7 +497,9 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       label: routeName,
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+
+
+          backgroundColor: Colors.transparent,
           elevation: 0,
           leading: widget.delegate.buildLeading(context),
           title: TextField(

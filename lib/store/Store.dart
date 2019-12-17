@@ -13,10 +13,10 @@ class Store {
   static init({context, child}) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(builder: (_) => AppThemeModel()),
-        ChangeNotifierProvider(builder: (_) => BookModel()),
-        ChangeNotifierProvider(builder: (_) => ShelfModel()),
-        ChangeNotifierProvider(builder: (_) => SearchModel()),
+        ChangeNotifierProvider(create: (_) => AppThemeModel()),
+        ChangeNotifierProvider(create: (_) => BookModel()),
+        ChangeNotifierProvider(create: (_) => ShelfModel()),
+        ChangeNotifierProvider(create: (_) => SearchModel()),
       ],
       child: child,
     );

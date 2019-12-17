@@ -430,7 +430,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                           semanticFormatterCallback: (newValue) {
                             return '${newValue.round()} dollars';
                           },
-                          activeColor: Colors.lightBlue,
+                          activeColor:  Colors.lightBlue,
                           inactiveColor: Colors.grey,
                         ),
                         InkWell(

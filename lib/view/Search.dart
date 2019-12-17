@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:PureBook/common/common.dart';
 import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/entity/SearchItem.dart';
@@ -23,7 +24,7 @@ class SearchBarDelegate extends MySearchDelegate<String> {
     final ThemeData theme = Theme.of(context);
     assert(theme != null);
     return theme.copyWith(
-      primaryColor: Colors.white,
+      primaryColor: Colors.black,
       primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
       primaryColorBrightness: Brightness.light,
       primaryTextTheme: theme.textTheme,
@@ -34,7 +35,10 @@ class SearchBarDelegate extends MySearchDelegate<String> {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: Icon(
+          Icons.clear,
+          color: Colors.black,
+        ),
         onPressed: () {
           query = "";
           showSuggestions(context);
@@ -47,7 +51,10 @@ class SearchBarDelegate extends MySearchDelegate<String> {
   Widget buildLeading(BuildContext context) {
     return IconButton(
       icon: AnimatedIcon(
-          icon: AnimatedIcons.menu_arrow, progress: transitionAnimation),
+        icon: AnimatedIcons.menu_arrow,
+        progress: transitionAnimation,
+        color: Colors.black,
+      ),
       onPressed: () => close(context, null),
     );
   }
@@ -55,14 +62,8 @@ class SearchBarDelegate extends MySearchDelegate<String> {
   @override
   Widget buildResults(BuildContext context) {
     var value = Store.value<SearchModel>(context);
-    List<String> i = value.history;
-    for (var ii = 0; ii < i.length; ii++) {
-      if (i[ii] == query) {
-        i.removeAt(ii);
-      }
-    }
-    i.insert(0, query);
-    value.setHistory(i);
+
+    value.setHistory(query);
     return SearchResult(query);
   }
 
@@ -78,18 +79,22 @@ class SearchBarDelegate extends MySearchDelegate<String> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Text('搜索历史'),
+                    FlatButton(
+                      child: Text(
+                        '搜索历史',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    )
                   ],
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    Store.connect<SearchModel>(builder: (ctx, data, child) {
-                      var d = (data as SearchModel);
+                    Store.connect<SearchModel>(
+                        builder: (ctx, SearchModel data, child) {
                       return FlatButton(
                           onPressed: () {
-                            d.clearHistory();
+                            data.clearHistory();
                           },
                           child: Text('清空历史'));
                     }),
@@ -97,12 +102,11 @@ class SearchBarDelegate extends MySearchDelegate<String> {
                 ),
               ],
             ),
-            Store.connect<SearchModel>(builder: (ctx, data, child) {
-              var d = (data as SearchModel);
+            Store.connect<SearchModel>(builder: (ctx, SearchModel data, child) {
               return Wrap(
                 spacing: 2, //主轴上子控件的间距
                 runSpacing: 5, //交叉轴上子控件之间的间距
-                children: getHistory(d.history, context),
+                children: getHistory(data.getHistory(), context),
               );
             }),
           ],
@@ -110,18 +114,18 @@ class SearchBarDelegate extends MySearchDelegate<String> {
   }
 
   getHistory(List<String> history, BuildContext context) {
-
     List<Widget> wds = [];
     for (var i = 0; i < history.length; i++) {
-
-    wds.add(ActionChip(label: Text(history[i]),onPressed: (){
-        this.query=history[i];
-    },));
+      wds.add(ActionChip(
+        backgroundColor: Colors.white,
+        label: Text(history[i]),
+        onPressed: () {
+          this.query = history[i];
+        },
+      ));
     }
     return wds;
   }
-
-
 }
 
 class SearchResult extends StatefulWidget {
@@ -173,8 +177,7 @@ class _SearchResultState extends State<SearchResult>
     if (bks == null) {
       _context = context;
     }
-    var url =
-        'https://sou.jiaston.com/search.aspx?key=${this.widget.word}&page=$page&siteid=app2';
+    var url = '${Common.search}?key=${this.widget.word}&page=$page&siteid=app2';
 
     Response res = await Util(_context).http().get(url);
     List data = jsonDecode(res.data)['data'];
@@ -218,75 +221,85 @@ class _SearchResultState extends State<SearchResult>
       controller: _refreshController,
       onRefresh: _onRefresh,
       onLoading: _onLoading,
-      child: bks.length==0?Container():ListView.builder(
-        itemBuilder: (context, i) {
-          var auth = bks[i].Author;
-          var cate = bks[i].CName;
-          return GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child:  Row(
-              children: <Widget>[
-                 Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    new Container(
-                      padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                      child: new Image.network(
-                        bks[i].Img,
-                        height: 100,
-                        width: 80,
-                        fit: BoxFit.cover,
+      child: bks.length == 0
+          ? Container()
+          : ListView.builder(
+              itemBuilder: (context, i) {
+                var auth = bks[i].Author;
+                var cate = bks[i].CName;
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          new Container(
+                            padding:
+                                const EdgeInsets.only(left: 10.0, top: 10.0),
+                            child: new Image.network(
+                              bks[i].Img,
+                              height: 100,
+                              width: 80,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        ],
                       ),
-                    )
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  verticalDirection: VerticalDirection.down,
-                  // textDirection:,
-                  textBaseline: TextBaseline.alphabetic,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        verticalDirection: VerticalDirection.down,
+                        // textDirection:,
+                        textBaseline: TextBaseline.alphabetic,
 
-                  children: <Widget>[
-                    Container(
-                      padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                      child: new Text(
-                        bks[i].Name,
-                        style: TextStyle(fontSize: 15),
+                        children: <Widget>[
+                          Container(
+                            padding:
+                                const EdgeInsets.only(left: 10.0, top: 10.0),
+                            child: new Text(
+                              bks[i].Name,
+                              style: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          Container(
+                            padding:
+                                const EdgeInsets.only(left: 10.0, top: 10.0),
+                            child: new Text('$cate | $auth',
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.grey)),
+                          ),
+                          Container(
+                            padding:
+                                const EdgeInsets.only(left: 10.0, top: 10.0),
+                            child: new Text(bks[i].Desc,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
+                            width: 270,
+                          ),
+                        ],
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                      child: new Text('$cate | $auth',
-                          style: TextStyle(fontSize: 14, color: Colors.grey)),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                      child: new Text(bks[i].Desc,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                          style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      width: 270,
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  onTap: () async {
+                    String url =
+                        'https://shuapi.jiaston.com/info/${bks[i].Id}.html';
+
+                    Response future = await Util(context).http().get(url);
+
+                    var data = jsonDecode(future.data)['data'];
+                    BookInfo bookInfo = new BookInfo.fromJson(data);
+                    Navigator.of(context).push(new MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            new BookDetail(bookInfo)));
+                  },
+                );
+              },
+              itemCount: bks.length,
             ),
-            onTap: () async {
-              String url = 'https://shuapi.jiaston.com/info/${bks[i].Id}.html';
-
-              Response future = await Util(context).http().get(url);
-
-              var data = jsonDecode(future.data)['data'];
-              BookInfo bookInfo = new BookInfo.fromJson(data);
-              Navigator.of(context).push(new MaterialPageRoute(
-                  builder: (BuildContext context) => new BookDetail(bookInfo)));
-            },
-          );
-        },
-        itemCount: bks.length,
-      ),
     );
   }
 

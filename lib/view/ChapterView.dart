@@ -102,7 +102,8 @@ class _ChapterViewItem extends State<ChapterView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: new Text(
+        backgroundColor: Colors.transparent,
+        title:  Text(
           bookName,
           style: TextStyle(
               color: Store.value<AppThemeModel>(context)

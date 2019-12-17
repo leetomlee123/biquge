@@ -29,7 +29,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
   bool lv2 = true;
   bool lv3 = true;
   Map word1 = {0: 'man', 1: 'lady'};
-  Map word2 = {0: 'commend', 1: 'over', 2: 'collect', 3: 'new'};
+  Map word2 = {0:'hot',1: 'commend', 2: 'over', 3: 'collect', 4: 'new', 5: 'vote'};
   Map word3 = {0: 'week', 1: 'month', 2: 'total'};
   int idx1 = 0;
   int idx2 = 0;
@@ -81,6 +81,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
         title: Text(
           '排行榜',
           style: TextStyle(
+              fontSize: 18,
               color: Store.value<AppThemeModel>(context)
                   .getThemeData()
                   .iconTheme
@@ -88,15 +89,15 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
         ),
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
+          Wrap(
             children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
           ),
-          Row(
-            children: getBtnGroup(lv2, idx2, 1, ['推荐', '完结', '收藏', '新书']),
+          Wrap(
+            children: getBtnGroup(lv2, idx2, 1, ['最热','推荐', '完结', '收藏', '新书', '评分']),
           ),
-          Row(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
+          Wrap(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
           Expanded(
             child: SmartRefresher(
               enablePullDown: true,
@@ -233,7 +234,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
             height: 30,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: leve && i == idx ? Colors.blue : Colors.transparent,
+              color: leve && i == idx ? Colors.grey : Colors.transparent,
             ),
           ),
           onTap: () {
