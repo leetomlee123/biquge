@@ -9,11 +9,9 @@ import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/entity/Chapter.dart';
 import 'package:PureBook/entity/ChapterList.dart';
 import 'package:PureBook/event/event.dart';
-import 'package:PureBook/model/ThemeModel.dart';
-import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/ReadBook.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 
@@ -48,10 +46,7 @@ class _BookDetailState extends State<BookDetail>
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          color: Store.value<AppThemeModel>(context)
-              .getThemeData()
-              .iconTheme
-              .color,
+          color: Colors.black,
           onPressed: () {
             Navigator.pop(context);
           },
@@ -66,18 +61,12 @@ class _BookDetailState extends State<BookDetail>
             },
             child: Text(
               "书架",
-              style: TextStyle(
-                  color: Store.value<AppThemeModel>(context)
-                      .getThemeData()
-                      .iconTheme
-                      .color),
             ),
           )
         ],
       ),
       body: Column(
         children: <Widget>[
-
           Expanded(
             child: ListView(
               children: <Widget>[
@@ -135,7 +124,8 @@ class _BookDetailState extends State<BookDetail>
                             child: Row(
                               children: <Widget>[
                                 Rating(
-                                  initialRating: _bookInfo.BookVote.Score.toInt(),
+                                  initialRating:
+                                      _bookInfo.BookVote.Score.toInt(),
                                 ),
                                 Text(
                                   '${_bookInfo.BookVote.Score}分',
@@ -164,7 +154,7 @@ class _BookDetailState extends State<BookDetail>
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 17.0, top: 5.0),
-                      child:   Text(
+                      child: Text(
                         _bookInfo.Desc,
                         style: TextStyle(fontSize: 12),
                       ),
@@ -188,7 +178,7 @@ class _BookDetailState extends State<BookDetail>
                             fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    new ListTile(
+                    ListTile(
                       trailing: Icon(Icons.keyboard_arrow_right),
                       leading: Icon(Icons.list),
                       title: new Text('最近更新: ' + _bookInfo.LastTime,
@@ -197,9 +187,9 @@ class _BookDetailState extends State<BookDetail>
                       onTap: () {
                         _bookInfo.CId = -1;
                         addToShelf();
-                        Navigator.of(context).push( MaterialPageRoute(
+                        Navigator.of(context).push(MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                 ReadBook(_bookInfo)));
+                                ReadBook(_bookInfo)));
                       },
                     ),
                   ],
@@ -223,28 +213,29 @@ class _BookDetailState extends State<BookDetail>
                   shrinkWrap: true, //解决无限高度问题
                   physics: NeverScrollableScrollPhysics(), //禁用滑动事件
                   itemBuilder: (context, i) {
-                    return new GestureDetector(
+                    return GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      child: new Container(
-                        child: new Row(
+                      child: Container(
+                        child: Row(
                           children: <Widget>[
-                            new Column(
+                            Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: <Widget>[
-                                new Container(
+                                Container(
                                   padding: const EdgeInsets.only(
                                       left: 10.0, top: 10.0),
-                                  child: new CachedNetworkImage(
-                                    imageUrl: Common.imgPre +
+                                  child: ExtendedImage.network(
+                                    Common.imgPre +
                                         _bookInfo.SameUserBooks[i].Img,
                                     height: 100,
                                     width: 80,
                                     fit: BoxFit.cover,
+                                    cache: true,
                                   ),
                                 )
                               ],
                             ),
-                            new Column(
+                            Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.max,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,12 +250,7 @@ class _BookDetailState extends State<BookDetail>
                                     child: Text(
                                       _bookInfo.SameUserBooks[i].Name,
                                       style: TextStyle(
-                                          color: Store.value<AppThemeModel>(
-                                                  context)
-                                              .getThemeData()
-                                              .iconTheme
-                                              .color,
-                                          fontSize: 18.0),
+                                          color: Colors.black, fontSize: 18.0),
                                     )),
                                 Container(
                                   padding: const EdgeInsets.only(
@@ -278,7 +264,7 @@ class _BookDetailState extends State<BookDetail>
                                 Container(
                                   padding: const EdgeInsets.only(
                                       left: 10.0, top: 10.0),
-                                  child:  Text(
+                                  child: Text(
                                       _bookInfo.SameUserBooks[i].LastChapter,
                                       style: TextStyle(
                                           color: Colors.grey, fontSize: 11)),
@@ -293,10 +279,10 @@ class _BookDetailState extends State<BookDetail>
                             'https://shuapi.jiaston.com/info/${_bookInfo.SameUserBooks[i].Id}.html';
                         Response future = await Util(context).http().get(url);
                         var data = jsonDecode(future.data)['data'];
-                        BookInfo bookInfo =  BookInfo.fromJson(data);
+                        BookInfo bookInfo = BookInfo.fromJson(data);
                         Navigator.of(context).push(new MaterialPageRoute(
                             builder: (BuildContext context) =>
-                                 BookDetail(bookInfo)));
+                                BookDetail(bookInfo)));
                       },
                     );
                   },
@@ -432,7 +418,7 @@ class _BookDetailState extends State<BookDetail>
     var jsonDecode3 = jsonDecode(replace)['data'];
     List jsonDecode2 = jsonDecode3['list'];
     List<Chapter> temp = [];
-    var list = jsonDecode2.map((m) =>  ChapterList.fromJson(m)).toList();
+    var list = jsonDecode2.map((m) => ChapterList.fromJson(m)).toList();
     for (var i = 0; i < list.length; i++) {
       var list2 = list[i].list;
       temp.add(Chapter(0, 0, list[i].name));

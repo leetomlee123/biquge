@@ -5,7 +5,6 @@ import 'package:PureBook/common/toast.dart';
 import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/event/event.dart';
-import 'package:PureBook/model/ThemeModel.dart';
 import 'package:PureBook/service/TelAndSmsService.dart';
 import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/Forgetpass.dart';
@@ -54,23 +53,7 @@ class _PersonCenter extends State<PersonCenter>
           },
         ),
       ),
-      ClipRect(
-        child: ListTile(
-          leading: CircleAvatar(
-            child: Store.connect<AppThemeModel>(builder: (ctx, atm, child) {
-              return Text(
-                  '${(atm as AppThemeModel).getThemeData().brightness == Brightness.light ? 'Mo' : 'Su'}');
-            }),
-          ),
-          title: Text(
-              '${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? '夜间模式' : '日间模式'}'),
-          onTap: () => {
-            Store.value<AppThemeModel>(context).setModel(
-                Store.value<AppThemeModel>(context).getThemeData().brightness ==
-                    Brightness.light)
-          },
-        ),
-      ),
+
       ListTile(
         leading: CircleAvatar(
           child: Text('Re'),

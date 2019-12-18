@@ -5,10 +5,9 @@ import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/entity/TopBook.dart';
 import 'package:PureBook/entity/TopResult.dart';
-import 'package:PureBook/model/ThemeModel.dart';
 import 'package:PureBook/store/Store.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -82,10 +81,8 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
           '排行榜',
           style: TextStyle(
               fontSize: 18,
-              color: Store.value<AppThemeModel>(context)
-                  .getThemeData()
-                  .iconTheme
-                  .color),
+            color: Colors.black,
+          ),
         ),
       ),
       body: Column(
@@ -139,11 +136,12 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
                             Container(
                               padding:
                                   const EdgeInsets.only(left: 10.0, top: 10.0),
-                              child: CachedNetworkImage(
-                                imageUrl: Common.imgPre + items[i].Img,
+                              child: ExtendedImage.network(
+                                 Common.imgPre + items[i].Img,
                                 height: 100,
                                 width: 80,
                                 fit: BoxFit.cover,
+                                cache: true,
                               ),
                             )
                           ],

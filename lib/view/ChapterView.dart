@@ -1,7 +1,5 @@
 import 'package:PureBook/entity/Chapter.dart';
 import 'package:PureBook/event/event.dart';
-import 'package:PureBook/model/ThemeModel.dart';
-import 'package:PureBook/store/Store.dart';
 import 'package:flutter/material.dart';
 
 class ChapterView extends StatefulWidget {
@@ -106,10 +104,7 @@ class _ChapterViewItem extends State<ChapterView> {
         title:  Text(
           bookName,
           style: TextStyle(
-              color: Store.value<AppThemeModel>(context)
-                  .getThemeData()
-                  .iconTheme
-                  .color,
+
               fontSize: 16.0),
         ),
         centerTitle: true,

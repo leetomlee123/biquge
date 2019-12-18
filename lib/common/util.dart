@@ -20,7 +20,7 @@ class Util {
     _dio = new Dio();
     var dic = DirectoryUtil.getAppDocPath();
 
-    var cookieJar = PersistCookieJar(dir: dic + "/.cookies/");
+    var cookieJar = PersistCookieJar(dir:   "$dic/.cookies/");
     _dio.interceptors.add(CookieManager(cookieJar));
 
     _dio.interceptors

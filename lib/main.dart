@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:PureBook/entity/Book.dart';
-import 'package:PureBook/model/ThemeModel.dart';
 import 'package:PureBook/service/TelAndSmsService.dart';
 import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/BookShelf.dart';
@@ -15,16 +14,16 @@ import 'package:get_it/get_it.dart';
 
 import 'event/event.dart';
 
-//ca-app-pub-6006602100377888~3769076624
-//ca-app-pub-6006602100377888/8012817232
 List<Book> books = [];
 GetIt locator = GetIt.instance;
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await SpUtil.getInstance();
   await DirectoryUtil.getInstance();
 
   locator.registerSingleton(TelAndSmsService());
   runApp(Store.init(child: MyApp()));
+
   if (Platform.isAndroid) {
     SystemUiOverlayStyle systemUiOverlayStyle =
         SystemUiOverlayStyle(statusBarColor: Colors.transparent);
@@ -35,21 +34,9 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-//    myBanner
-//    // typically this happens well before the ad is shown
-//      ..load()
-//      ..show(
-//        // Positions the banner ad 60 pixels from the bottom of the screen
-//        anchorOffset: 0.0,
-//        // Positions the banner ad 10 pixels from the center of the screen to the right
-//        horizontalCenterOffset: 0.0,
-//        // Banner Position
-//        anchorType: AnchorType.bottom,
-//      );
+
     return MaterialApp(
       title: '清阅',
-      theme: Store.value<AppThemeModel>(context).getThemeData(),
       home: MainPage(),
     );
   }
