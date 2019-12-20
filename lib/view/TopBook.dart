@@ -5,7 +5,6 @@ import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/entity/TopBook.dart';
 import 'package:PureBook/entity/TopResult.dart';
-import 'package:PureBook/store/Store.dart';
 import 'package:dio/dio.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flustars/flustars.dart';
@@ -28,7 +27,14 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
   bool lv2 = true;
   bool lv3 = true;
   Map word1 = {0: 'man', 1: 'lady'};
-  Map word2 = {0:'hot',1: 'commend', 2: 'over', 3: 'collect', 4: 'new', 5: 'vote'};
+  Map word2 = {
+    0: 'hot',
+    1: 'commend',
+    2: 'over',
+    3: 'collect',
+    4: 'new',
+    5: 'vote'
+  };
   Map word3 = {0: 'week', 1: 'month', 2: 'total'};
   int idx1 = 0;
   int idx2 = 0;
@@ -68,6 +74,110 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
     _refreshController.loadComplete();
   }
 
+  Widget _buildContent() {
+    return CustomScrollView(slivers: <Widget>[
+      SliverToBoxAdapter(
+        child: Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Wrap(
+                children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
+              ),
+              Wrap(
+                children: getBtnGroup(
+                    lv2, idx2, 1, ['最热', '推荐', '完结', '收藏', '新书', '评分']),
+              ),
+              Wrap(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
+            ],
+          ),
+        ),
+      ),
+      SliverFixedExtentList(
+          delegate: SliverChildBuilderDelegate(_buildListItem,
+              childCount: items.length),
+          itemExtent: 118.0)
+    ]);
+  }
+
+  // 列表项
+  Widget _buildListItem(BuildContext context, int i) {
+    var auth = items[i].Author;
+    var cate = items[i].CName;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        verticalDirection: VerticalDirection.up,
+        children: <Widget>[
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                child: ExtendedImage.network(
+                  Common.imgPre + items[i].Img,
+                  height: 100,
+                  width: 80,
+                  fit: BoxFit.cover,
+                  cache: true,
+                ),
+              )
+            ],
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                    padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          items[i].Name,
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        Expanded(child: Container()),
+                        Container(
+                          padding: const EdgeInsets.only(right: 15.0),
+                          child: Text(
+                            items[i].Score.toString(),
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ],
+                    )),
+                Container(
+                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                  child: new Text('$cate | $auth',
+                      style: TextStyle(fontSize: 14, color: Colors.grey)),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                  child: new Text(items[i].Desc,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  width: 270,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      onTap: () async {
+        String url = 'https://shuapi.jiaston.com/info/${items[i].Id}.html';
+
+        Response future = await Util(context).http().get(url);
+
+        var data = jsonDecode(future.data)['data'];
+        BookInfo bookInfo = new BookInfo.fromJson(data);
+        Navigator.of(context).push(new MaterialPageRoute(
+            builder: (BuildContext context) => new BookDetail(bookInfo)));
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -80,137 +190,36 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
         title: Text(
           '排行榜',
           style: TextStyle(
-              fontSize: 18,
+            fontSize: 18,
             color: Colors.black,
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Wrap(
-            children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
-          ),
-          Wrap(
-            children: getBtnGroup(lv2, idx2, 1, ['最热','推荐', '完结', '收藏', '新书', '评分']),
-          ),
-          Wrap(children: getBtnGroup(lv3, idx3, 2, ['周榜', ' 月榜', '总榜'])),
-          Expanded(
-            child: SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: true,
-              header: WaterDropHeader(),
-              footer: CustomFooter(
-                builder: (BuildContext context, LoadStatus mode) {
-                  if (mode == LoadStatus.idle) {
-                  } else if (mode == LoadStatus.loading) {
-                    body = CupertinoActivityIndicator();
-                  } else if (mode == LoadStatus.failed) {
-                    body = Text("加载失败！点击重试！");
-                  } else if (mode == LoadStatus.canLoading) {
-                    body = Text("松手,加载更多!");
-                  } else {
-                    body = Text("到底了!");
-                  }
-                  return Center(
-                    child: body,
-                  );
-                },
-              ),
-              controller: _refreshController,
-              onRefresh: _onRefresh,
-              onLoading: _onLoading,
-              child: ListView.builder(
-                itemBuilder: (context, i) {
-                  var auth = items[i].Author;
-                  var cate = items[i].CName;
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      verticalDirection: VerticalDirection.up,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Container(
-                              padding:
-                                  const EdgeInsets.only(left: 10.0, top: 10.0),
-                              child: ExtendedImage.network(
-                                 Common.imgPre + items[i].Img,
-                                height: 100,
-                                width: 80,
-                                fit: BoxFit.cover,
-                                cache: true,
-                              ),
-                            )
-                          ],
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                  padding: const EdgeInsets.only(
-                                      left: 10.0, top: 10.0),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Text(
-                                        items[i].Name,
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                      Expanded(child: Container()),
-                                      Container(
-                                        padding:
-                                            const EdgeInsets.only(right: 15.0),
-                                        child: Text(
-                                          items[i].Score.toString(),
-                                          style: TextStyle(fontSize: 15),
-                                        ),
-                                      ),
-                                    ],
-                                  )),
-                              Container(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 10.0),
-                                child: new Text('$cate | $auth',
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.grey)),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.only(
-                                    left: 10.0, top: 10.0),
-                                child: new Text(items[i].Desc,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: TextStyle(
-                                        fontSize: 12, color: Colors.grey)),
-                                width: 270,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: () async {
-                      String url =
-                          'https://shuapi.jiaston.com/info/${items[i].Id}.html';
-
-                      Response future = await Util(context).http().get(url);
-
-                      var data = jsonDecode(future.data)['data'];
-                      BookInfo bookInfo = new BookInfo.fromJson(data);
-                      Navigator.of(context).push(new MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              new BookDetail(bookInfo)));
-                    },
-                  );
-                },
-                itemCount: items.length,
-              ),
-            ),
-          )
-        ],
+      body: SmartRefresher(
+        enablePullDown: true,
+        enablePullUp: true,
+        header: WaterDropHeader(),
+        footer: CustomFooter(
+          builder: (BuildContext context, LoadStatus mode) {
+            if (mode == LoadStatus.idle) {
+            } else if (mode == LoadStatus.loading) {
+              body = CupertinoActivityIndicator();
+            } else if (mode == LoadStatus.failed) {
+              body = Text("加载失败！点击重试！");
+            } else if (mode == LoadStatus.canLoading) {
+              body = Text("松手,加载更多!");
+            } else {
+              body = Text("到底了!");
+            }
+            return Center(
+              child: body,
+            );
+          },
+        ),
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: _buildContent(),
       ),
     );
 

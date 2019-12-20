@@ -104,7 +104,7 @@ class _ChapterViewItem extends State<ChapterView> {
         title:  Text(
           bookName,
           style: TextStyle(
-
+color: Colors.black,
               fontSize: 16.0),
         ),
         centerTitle: true,
