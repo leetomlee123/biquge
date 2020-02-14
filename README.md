@@ -5,50 +5,46 @@
 
 
 视图
-<div style="float: left">
-
-<div>
-	<img src="imgs/shelf.jpg"   width="10%" height="10%">
+<p align="center">
+	<img src="imgs/shelf.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>书架</em>
 	</p>
-</div>
-<div >
-	<img src="imgs/top.jpg"   width="30%" height="30%">
+</p>
+<p align="center">
+	<img src="imgs/top.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>排行榜</em>
 	</p>
-</div>
-<div >
-	<img src="imgs/detail.jpg"   width="30%" height="30%">
+</p>
+<p align="center">
+	<img src="imgs/detail.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>书籍详情</em>
 	</p>
-</div>
-</div>
-
+</p>
 <p align="center">
-	<img src="imgs/read.jpg"   width="30%" height="30%">
+	<img src="imgs/read.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>阅读页</em>
 	</p>
 </p>
 
 <p align="center">
-	<img src="imgs/person.jpg"   width="30%" height="30%">
+	<img src="imgs/person.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>个人中心页</em>
 	</p>
 </p>
 
 <p align="center">
-	<img src="imgs/search.jpg"   width="30%" height="30%">
+	<img src="imgs/search.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>搜索页</em>
 	</p>
 </p>
 <p align="center">
-	<img src="imgs/chapters.jpg"   width="30%" height="30%">
+	<img src="imgs/chapters.jpg"   width="20%" height="20%">
 	<p align="center">
 		<em>章节页</em>
 	</p>
