@@ -7,7 +7,6 @@ import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/event/event.dart';
 import 'package:PureBook/main.dart';
-import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/MySearchDelegate.dart';
 import 'package:PureBook/view/ReadBook.dart';
 import 'package:PureBook/view/Search.dart';
@@ -67,20 +66,17 @@ class _BookShelfState extends State<BookShelf>
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          color: Colors.black,
           icon: ImageIcon(
             AssetImage("images/account.png"),
           ),
           onPressed: () {
-            eventBus.fire( OpenEvent(''));
+            eventBus.fire(OpenEvent(''));
           },
         ),
-        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           '书架',
           style: TextStyle(
-            color: Colors.black,
             fontSize: 18,
           ),
         ),
@@ -88,54 +84,57 @@ class _BookShelfState extends State<BookShelf>
         actions: <Widget>[
           IconButton(
               icon: Icon(Icons.search),
-              color: Colors.black,
               tooltip: '搜索小说',
               onPressed: () {
                 myshowSearch(context: context, delegate: SearchBarDelegate());
               }),
         ],
       ),
-      body: SmartRefresher(
-        enablePullDown: true,
-        header: WaterDropHeader(),
-        footer: CustomFooter(
-          builder: (BuildContext context, LoadStatus mode) {
-            if (mode == LoadStatus.idle) {
-            } else if (mode == LoadStatus.loading) {
-              body = CupertinoActivityIndicator();
-            } else if (mode == LoadStatus.failed) {
-              body = Text("加载失败！点击重试！");
-            } else if (mode == LoadStatus.canLoading) {
-              body = Text("松手,加载更多!");
-            } else {
-              body = Text("到底了!");
-            }
-            return Center(
-              child: body,
-            );
-          },
-        ),
-        controller: _refreshController,
-        onRefresh: freshShelf,
-        child: ListView.builder(
-            itemCount: dataSource.length,
-            itemBuilder: (context, i) {
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    dataSource[i].NewChapterCount = 0;
-                  });
-                  Book temp = dataSource[i];
-                  updateBookList(dataSource[i]);
-                  Navigator.of(context).push(new MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          ReadBook(BookInfo.id(temp.Id, temp.Name))));
+      body: !SpUtil.haveKey("login")
+          ? Center(
+              child: Text("因接口权限限制,请注册登陆后阅读"),
+            )
+          : SmartRefresher(
+              enablePullDown: true,
+              header: WaterDropHeader(),
+              footer: CustomFooter(
+                builder: (BuildContext context, LoadStatus mode) {
+                  if (mode == LoadStatus.idle) {
+                  } else if (mode == LoadStatus.loading) {
+                    body = CupertinoActivityIndicator();
+                  } else if (mode == LoadStatus.failed) {
+                    body = Text("加载失败！点击重试！");
+                  } else if (mode == LoadStatus.canLoading) {
+                    body = Text("松手,加载更多!");
+                  } else {
+                    body = Text("到底了!");
+                  }
+                  return Center(
+                    child: body,
+                  );
                 },
-                child: getBookItemView(dataSource[i]),
-              );
-            }),
-      ),
+              ),
+              controller: _refreshController,
+              onRefresh: freshShelf,
+              child: ListView.builder(
+                  itemCount: dataSource.length,
+                  itemBuilder: (context, i) {
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        setState(() {
+                          dataSource[i].NewChapterCount = 0;
+                        });
+                        Book temp = dataSource[i];
+                        updateBookList(dataSource[i]);
+                        Navigator.of(context).push(new MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                ReadBook(BookInfo.id(temp.Id, temp.Name))));
+                      },
+                      child: getBookItemView(dataSource[i]),
+                    );
+                  }),
+            ),
     );
   }
 
@@ -179,7 +178,6 @@ class _BookShelfState extends State<BookShelf>
     _refreshController.refreshCompleted();
   }
 
-
   getBookItemView(Book item) {
     return Dismissible(
       key: Key(item.Id.toString()),
@@ -194,7 +192,7 @@ class _BookShelfState extends State<BookShelf>
                   child: Stack(
                     children: <Widget>[
                       ExtendedImage.network(
-                         Common.imgPre + item.Img,
+                        Common.imgPre + item.Img,
                         height: 100,
                         width: 80,
                         fit: BoxFit.cover,
@@ -202,8 +200,8 @@ class _BookShelfState extends State<BookShelf>
                       ),
                       item.NewChapterCount == 1
                           ? Container(
-                        height: 100,
-                        width: 80,
+                              height: 100,
+                              width: 80,
                               child: Align(
                                 alignment: Alignment.topRight,
                                 child: Image.asset(
@@ -354,13 +352,13 @@ class _BookShelfState extends State<BookShelf>
       //先从本地缓存中拿
       var name = SpUtil.getString(Common.listbookname);
       List decode2 = json.decode(name);
-      books = decode2.map((m) => new Book.fromJson(m)).toList();
+      books = decode2.map((m) => Book.fromJson(m)).toList();
       setState(() {
         dataSource = books;
       });
       //先登录获取cookie
 
-      freshShelf();
+//      freshShelf();
     } else {
       if (!SpUtil.haveKey('username')) {
         Toast.show('请登录后同步书架');

@@ -10,6 +10,8 @@ import 'package:PureBook/entity/BookTag.dart';
 import 'package:PureBook/entity/Chapter.dart';
 import 'package:PureBook/entity/ChapterList.dart';
 import 'package:PureBook/event/event.dart';
+import 'package:PureBook/model/ColorModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/BookDetail.dart';
 import 'package:PureBook/view/ChapterView.dart';
 import 'package:PureBook/view/MyBottomSheet.dart';
@@ -48,7 +50,6 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     [231, 241, 231],
     [228, 239, 242],
     [242, 228, 228],
-    [0, 0, 0]
   ];
 
   int bg_i = 0;
@@ -66,6 +67,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     SpUtil.putString(_bookInfo.Id.toString(), jsonEncode(_bookTag));
     SpUtil.putDouble('fontSize', fontSize);
     SpUtil.putInt('bg_i', bg_i);
+
     WidgetsBinding.instance.removeObserver(this);
   }
 
@@ -157,7 +159,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
     var jsonDecode3 = jsonDecode(replace)['data'];
     List jsonDecode2 = jsonDecode3['list'];
     List<Chapter> temp = [];
-    var list = jsonDecode2.map((m) => new ChapterList.fromJson(m)).toList();
+    var list = jsonDecode2.map((m) => ChapterList.fromJson(m)).toList();
     //第一次加载章节
     for (var i = 0; i < list.length; i++) {
       //目录名hasContent=0
@@ -430,8 +432,6 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                           semanticFormatterCallback: (newValue) {
                             return '${newValue.round()} dollars';
                           },
-                          activeColor:  Colors.lightBlue,
-                          inactiveColor: Colors.grey,
                         ),
                         InkWell(
                           child: Container(
@@ -481,42 +481,6 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                               ),
                             ),
                           ),
-//                          TableCell(
-//                            child: Center(
-//                              child: InkWell(
-//                                child: Container(
-//                                  alignment: Alignment.center,
-//                                  height: 50,
-//                                  child: Text(
-//                                    '${Store.value<AppThemeModel>(context).getThemeData().brightness == Brightness.light ? '夜间' : '日间'}',
-//                                    maxLines: 1,
-//                                    style: TextStyle(color: Colors.blue),
-//                                    overflow: TextOverflow.ellipsis,
-//                                  ),
-//                                ),
-//                                onTap: () {
-//                                  state(() {
-//                                    Store.value<AppThemeModel>(context)
-//                                        .setModel(
-//                                            Store.value<AppThemeModel>(context)
-//                                                    .getThemeData()
-//                                                    .brightness ==
-//                                                Brightness.light);
-//                                  });
-//                                  if (Store.value<AppThemeModel>(context)
-//                                          .getThemeData()
-//                                          .brightness ==
-//                                      Brightness.light) {
-//                                    bg_i = pre_bg_i;
-//                                  } else {
-//                                    pre_bg_i = bg_i;
-//                                    bg_i = bgs.length - 1;
-//                                  }
-//                                  setState(() {});
-//                                },
-//                              ),
-//                            ),
-//                          ),
                           TableCell(
                             child: Center(
                               child: InkWell(
@@ -608,15 +572,12 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                   TableCell(
                                                     child: Center(
                                                       child: IconButton(
-                                                        icon: ImageIcon(
-                                                          AssetImage(
-                                                              "images/font_jia.png"),
-                                                          color: Colors.blue,
-                                                        ),
+                                                        icon:
+                                                            Icon(Icons.remove),
                                                         onPressed: () async {
                                                           state(() {
                                                             ///为了区分把setState改个名字
-                                                            fontSize += 1;
+                                                            fontSize -= 1;
                                                           });
                                                           setState(() {
                                                             _bookTag.index = 0;
@@ -637,15 +598,11 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                                   TableCell(
                                                     child: Center(
                                                       child: IconButton(
-                                                        icon: ImageIcon(
-                                                          AssetImage(
-                                                              "images/font_jian.png"),
-                                                          color: Colors.blue,
-                                                        ),
+                                                        icon: Icon(Icons.add),
                                                         onPressed: () async {
                                                           state(() {
                                                             ///为了区分把setState改个名字
-                                                            fontSize -= 1;
+                                                            fontSize += 1;
                                                             setState(() {
                                                               _bookTag.index =
                                                                   0;
@@ -697,7 +654,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                                 ),
                                 onTap: () async {
                                   String url =
-                                      'https://shuapi.jiaston.com/info/${_bookInfo.Id}.html';
+                                      Common.bookInfo + '${_bookInfo.Id}.html';
 
                                   Response future =
                                       await Util(context).http().get(url);
@@ -741,7 +698,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
 
   List<Widget> readThemes() {
     List<Widget> wds = [];
-    for (var i = 0; i < bgs.length - 1; i++) {
+    for (var i = 0; i < bgs.length; i++) {
       var f = bgs[i];
       wds.add(RawMaterialButton(
         onPressed: () {
@@ -772,11 +729,10 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-//      backgroundColor: Colors.transparent,
-
       key: _globalKey,
-      backgroundColor:
-          Color.fromRGBO(bgs[bg_i][0], bgs[bg_i][1], bgs[bg_i][2], 1),
+      backgroundColor: Store.value<ColorModel>(context).dark
+          ? Color.fromRGBO(38, 38, 38, 1)
+          : Color.fromRGBO(bgs[bg_i][0], bgs[bg_i][1], bgs[bg_i][2], 1),
       drawer: Drawer(
         child: ChapterView(
             chapters, _bookInfo.Id.toString(), _bookTag.cur, _bookInfo.Name),
@@ -784,10 +740,6 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
       body: Stack(
         children: <Widget>[
           Container(
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage("images/read_bg.jpg"),
-                    fit: BoxFit.cover)),
             child: MyPageView.builder(
               controller: _pageController,
               physics: AlwaysScrollableScrollPhysics(),
@@ -819,7 +771,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
               children: <Widget>[
                 Text(
                   chapters.length > 0 ? chapters[_bookTag.cur].name : '',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
+                  style: TextStyle(fontSize: 16),
                 ),
                 Expanded(child: Container()),
                 Row(
@@ -829,7 +781,7 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
                       _bookTag.pageOffsets == null
                           ? ''
                           : '第${_bookTag.index + 1}/${_bookTag.pageOffsets.length}页',
-                      style: TextStyle(fontSize: 13, color: Colors.black),
+                      style: TextStyle(fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -869,8 +821,8 @@ class _ReadBookState extends State<ReadBook> with WidgetsBindingObserver {
               child: Text(
                 content,
                 style: TextStyle(
-                    fontSize: fontSize / Screen.textScaleFactor,
-                    color: Colors.black),
+                  fontSize: fontSize / Screen.textScaleFactor,
+                ),
               )),
         ),
       );

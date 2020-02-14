@@ -5,6 +5,7 @@ import 'package:PureBook/common/toast.dart';
 import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/Book.dart';
 import 'package:PureBook/event/event.dart';
+import 'package:PureBook/model/ColorModel.dart';
 import 'package:PureBook/service/TelAndSmsService.dart';
 import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/Forgetpass.dart';
@@ -38,22 +39,30 @@ class _PersonCenter extends State<PersonCenter>
           SpUtil.getString('username'),
         ),
         accountEmail: Text(
-          SpUtil.haveKey('email') ? SpUtil.getString('email') : '点击头像登陆',
+          SpUtil.haveKey('email') ? SpUtil.getString('email') : '点击头像登陆/注册',
         ),
         currentAccountPicture: GestureDetector(
           child: CircleAvatar(
             backgroundImage: AssetImage("images/fu.png"),
           ),
           onTap: () {
-            if(!SpUtil.haveKey('email')) {
-            Navigator.of(context).push( MaterialPageRoute(
-            builder: (BuildContext context) => Login()));
+            if (!SpUtil.haveKey('email')) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => Login()));
             }
-
           },
         ),
       ),
-
+      Store.connect<ColorModel>(
+          builder: (context, ColorModel data, child) => ListTile(
+                leading: CircleAvatar(
+                  child: Text(data.dark ? '夜' : '日'),
+                ),
+                title: Text(data.dark ? '夜间模式' : '日间模式'),
+                onTap: () {
+                  data.switchModel();
+                },
+              )),
       ListTile(
         leading: CircleAvatar(
           child: Text('Re'),
@@ -86,7 +95,7 @@ class _PersonCenter extends State<PersonCenter>
                     ),
                     actions: <Widget>[
                       FlatButton(
-                        child:  Text("确定"),
+                        child: Text("确定"),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
@@ -115,7 +124,7 @@ class _PersonCenter extends State<PersonCenter>
                         IconButton(
                           onPressed: () {
                             ClipboardData data =
-                                new ClipboardData(text: "953457248");
+                                ClipboardData(text: "953457248");
                             Clipboard.setData(data);
                           },
                           icon: Icon(Icons.content_copy),
@@ -133,15 +142,15 @@ class _PersonCenter extends State<PersonCenter>
                   ));
         },
       ),
-          ListTile(
-            leading: CircleAvatar(
-              child: Text('Fe'),
-            ),
-            title: Text('意见反馈'),
-            onTap: () {
-              locator<TelAndSmsService>().sendEmail('leetomlee123@gmail.com');
-            },
-          ),
+      ListTile(
+        leading: CircleAvatar(
+          child: Text('Fe'),
+        ),
+        title: Text('意见反馈'),
+        onTap: () {
+          locator<TelAndSmsService>().sendEmail('leetomlee123@gmail.com');
+        },
+      ),
       ListTile(
         leading: CircleAvatar(
           child: Text('Ab'),
@@ -165,25 +174,26 @@ class _PersonCenter extends State<PersonCenter>
                   ));
         },
       ),
-     SpUtil.haveKey('login')? MaterialButton(
-        child: Text('退出登录'),
-        onPressed: () {
-          SpUtil.remove('username');
-          SpUtil.remove('login');
-          SpUtil.remove('email');
+      SpUtil.haveKey('login')
+          ? MaterialButton(
+              child: Text('退出登录'),
+              onPressed: () {
+                SpUtil.remove('username');
+                SpUtil.remove('login');
+                SpUtil.remove('email');
 
-          List books = jsonDecode(SpUtil.getString(Common.listbookname));
-          Util(null).delLocalCache(
-              books.map((f) => Book.fromJson(f).Id.toString()).toList());
-          SpUtil.remove(Common.listbookname);
+                List books = jsonDecode(SpUtil.getString(Common.listbookname));
+                Util(null).delLocalCache(
+                    books.map((f) => Book.fromJson(f).Id.toString()).toList());
+                SpUtil.remove(Common.listbookname);
 
-          eventBus.fire(new BooksEvent([]));
-        },
-      ):Container()
+                eventBus.fire(new BooksEvent([]));
+              },
+            )
+          : Container()
     ]);
 
     return Scaffold(
-
       body: personbody,
     );
   }
@@ -201,7 +211,7 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     login() async {
-      FormData formData =  FormData.fromMap({
+      FormData formData = FormData.fromMap({
         "password": pwd,
         "username": username,
         "usecookie": 43200,
@@ -230,15 +240,6 @@ class Login extends StatelessWidget {
       }
     }
 
-    final logo = Hero(
-      tag: 'God Group Ltcd',
-      child: CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 48.0,
-        child: Image.asset('images/logo.png'),
-      ),
-    );
-
     final email = TextFormField(
       autofocus: false,
       decoration: InputDecoration(
@@ -260,7 +261,6 @@ class Login extends StatelessWidget {
 //        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       onChanged: (String value) {
-        print(value);
         this.pwd = value;
       },
     );
@@ -276,16 +276,13 @@ class Login extends StatelessWidget {
 //          Navigator.of(context).pushNamed(HomePage.tag);
         },
         padding: EdgeInsets.all(12),
-        color: Colors.grey,
-        child: Text('登陆', style: TextStyle(color: Colors.white)),
+        child: Text('登陆'),
       ),
     );
-
 
     final forgotLabel = FlatButton(
       child: Text(
         '忘记密码?',
-        style: TextStyle(color: Colors.black54),
       ),
       onPressed: () {
         Navigator.of(context).push(new MaterialPageRoute(
@@ -295,7 +292,6 @@ class Login extends StatelessWidget {
     final loginUpLabel = FlatButton(
       child: Text(
         '注册',
-        style: TextStyle(color: Colors.black54),
       ),
       onPressed: () {
         Navigator.of(context).push(new MaterialPageRoute(
@@ -307,7 +303,6 @@ class Login extends StatelessWidget {
         shrinkWrap: true,
         padding: EdgeInsets.only(left: 24.0, right: 24.0),
         children: <Widget>[
-          logo,
           SizedBox(height: 48.0),
           email,
           SizedBox(height: 8.0),

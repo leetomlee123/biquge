@@ -29,6 +29,4 @@ class SearchModel with ChangeNotifier {
     searchHistory = [];
     notifyListeners();
   }
-
-
 }

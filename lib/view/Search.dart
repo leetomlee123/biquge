@@ -174,7 +174,7 @@ class _SearchResultState extends State<SearchResult>
 
   getSearchData() async {
     var _context = null;
-    if (bks == null) {
+    if (bks.length==0) {
       _context = context;
     }
     var url = '${Common.search}?key=${this.widget.word}&page=$page&siteid=app2';

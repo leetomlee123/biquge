@@ -46,15 +46,14 @@ class _BookDetailState extends State<BookDetail>
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          color: Colors.black,
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         elevation: 0,
-        backgroundColor: Color.fromARGB(1, 245, 245, 245),
         actions: <Widget>[
           MaterialButton(
+            textTheme: ButtonTextTheme.normal,
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => MainPage()));
@@ -249,13 +248,12 @@ class _BookDetailState extends State<BookDetail>
                                         left: 10.0, top: 10.0),
                                     child: Text(
                                       _bookInfo.SameUserBooks[i].Name,
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 18.0),
+                                      style: TextStyle(fontSize: 18.0),
                                     )),
                                 Container(
                                   padding: const EdgeInsets.only(
                                       left: 10.0, top: 10.0),
-                                  child: new Text(
+                                  child: Text(
                                     _bookInfo.SameUserBooks[i].Author,
                                     style: TextStyle(fontSize: 12),
                                     overflow: TextOverflow.ellipsis,
@@ -266,6 +264,7 @@ class _BookDetailState extends State<BookDetail>
                                       left: 10.0, top: 10.0),
                                   child: Text(
                                       _bookInfo.SameUserBooks[i].LastChapter,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           color: Colors.grey, fontSize: 11)),
                                 ),

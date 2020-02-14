@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:PureBook/entity/Book.dart';
+import 'package:PureBook/model/ColorModel.dart';
 import 'package:PureBook/service/TelAndSmsService.dart';
 import 'package:PureBook/store/Store.dart';
 import 'package:PureBook/view/BookShelf.dart';
 import 'package:PureBook/view/PersonCenter.dart';
 import 'package:PureBook/view/TopBook.dart';
-
 import 'package:flustars/flustars.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +16,7 @@ import 'event/event.dart';
 
 List<Book> books = [];
 GetIt locator = GetIt.instance;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SpUtil.getInstance();
@@ -23,12 +24,12 @@ void main() async {
 
   locator.registerSingleton(TelAndSmsService());
   runApp(Store.init(child: MyApp()));
-
   if (Platform.isAndroid) {
-    SystemUiOverlayStyle systemUiOverlayStyle =
-        SystemUiOverlayStyle(statusBarColor: Colors.transparent);
+    SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent);
     SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
   }
+
 }
 
 class MyApp extends StatelessWidget {
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return MaterialApp(
+      theme: Store.value<ColorModel>(context).themeData,
       title: '清阅',
       home: MainPage(),
     );
@@ -56,14 +58,14 @@ class _MainPageState extends State<MainPage> {
         icon: ImageIcon(
           AssetImage("images/shelf.png"),
         ),
-        title:  Text(
+        title: Text(
           '书架',
         )),
     BottomNavigationBarItem(
         icon: ImageIcon(
           AssetImage("images/rank.png"),
         ),
-        title:  Text(
+        title: Text(
           '排行榜',
         )),
   ];
@@ -71,10 +73,7 @@ class _MainPageState extends State<MainPage> {
   /*
    * 存储的四个页面，和Fragment一样
    */
-  var _pages = [
-     BookShelf(),
-     TopBook(),
-  ];
+  var _pages = [BookShelf(), TopBook()];
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
   @override
@@ -84,17 +83,15 @@ class _MainPageState extends State<MainPage> {
         child: PersonCenter(),
       ),
       key: _scaffoldKey,
-      body: SafeArea(
-        child: PageView.builder(
-            //要点1
-            physics: NeverScrollableScrollPhysics(),
-            //禁止页面左右滑动切换
-            controller: _pageController,
-            onPageChanged: _pageChanged,
-            //回调函数
-            itemCount: _pages.length,
-            itemBuilder: (context, index) => _pages[index]),
-      ),
+      body: PageView.builder(
+          //要点1
+          physics: NeverScrollableScrollPhysics(),
+          //禁止页面左右滑动切换
+          controller: _pageController,
+          onPageChanged: _pageChanged,
+          //回调函数
+          itemCount: _pages.length,
+          itemBuilder: (context, index) => _pages[index]),
       bottomNavigationBar: BottomNavigationBar(
         elevation: 0,
         items: bottoms,

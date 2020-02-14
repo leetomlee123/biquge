@@ -83,7 +83,7 @@ class _ChapterViewItem extends State<ChapterView> {
           title: getTitle(title, has),
           trailing: new Text(
             has == 2 ? "已缓存" : "",
-            style: TextStyle(fontSize: 8, color: Colors.grey),
+            style: TextStyle(fontSize: 8),
           ),
           selected: index == cur,
           onTap: () {
@@ -100,11 +100,9 @@ class _ChapterViewItem extends State<ChapterView> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         title:  Text(
           bookName,
           style: TextStyle(
-color: Colors.black,
               fontSize: 16.0),
         ),
         centerTitle: true,

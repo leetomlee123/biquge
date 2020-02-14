@@ -1,6 +1,5 @@
-import 'package:PureBook/model/BookModel.dart';
+import 'package:PureBook/model/ColorModel.dart';
 import 'package:PureBook/model/SearchModel.dart';
-import 'package:PureBook/model/ShelfModel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,10 +11,8 @@ class Store {
   static init({context, child}) {
     return MultiProvider(
       providers: [
-
-        ChangeNotifierProvider(create: (_) => BookModel()),
-        ChangeNotifierProvider(create: (_) => ShelfModel()),
         ChangeNotifierProvider(create: (_) => SearchModel()),
+        ChangeNotifierProvider(create: (_) => ColorModel()),
       ],
       child: child,
     );

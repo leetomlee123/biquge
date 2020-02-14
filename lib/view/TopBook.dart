@@ -5,6 +5,8 @@ import 'package:PureBook/common/util.dart';
 import 'package:PureBook/entity/BookInfo.dart';
 import 'package:PureBook/entity/TopBook.dart';
 import 'package:PureBook/entity/TopResult.dart';
+import 'package:PureBook/model/ColorModel.dart';
+import 'package:PureBook/store/Store.dart';
 import 'package:dio/dio.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flustars/flustars.dart';
@@ -81,6 +83,9 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              SizedBox(
+                height: 5,
+              ),
               Wrap(
                 children: getBtnGroup(lv1, idx1, 0, ['男生', '女生']),
               ),
@@ -130,7 +135,7 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                    padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                    padding: const EdgeInsets.only(left: 10.0),
                     child: Row(
                       children: <Widget>[
                         Text(
@@ -185,13 +190,11 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Color.fromARGB(1, 245, 245, 245),
         centerTitle: true,
         title: Text(
           '排行榜',
           style: TextStyle(
             fontSize: 18,
-            color: Colors.black,
           ),
         ),
       ),
@@ -241,7 +244,9 @@ class _TopBookState extends State<TopBook> with AutomaticKeepAliveClientMixin {
             height: 30,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: leve && i == idx ? Colors.grey : Colors.transparent,
+              color: leve && i == idx
+                  ? Store.value<ColorModel>(context).themeData.primaryColor
+                  : Colors.transparent,
             ),
           ),
           onTap: () {

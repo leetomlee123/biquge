@@ -27,7 +27,6 @@ class _RegisterState extends State<Register> {
         elevation: 0,
         title: Text(
           '账号注册',
-          style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -104,8 +103,7 @@ class _RegisterState extends State<Register> {
                   register();
                 },
                 padding: EdgeInsets.all(12),
-                color: Colors.grey,
-                child: Text('注册', style: TextStyle(color: Colors.white)),
+                child: Text('注册'),
               ),
             )
           ],
