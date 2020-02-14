@@ -5,24 +5,28 @@
 
 
 视图
-<p align="center">
+<div style="float: left">
+
+<p>
 	<img src="imgs/shelf.jpg"   width="30%" height="30%">
 	<p align="center">
 		<em>书架</em>
 	</p>
 </p>
-<p align="center">
+<p >
 	<img src="imgs/top.jpg"   width="30%" height="30%">
 	<p align="center">
 		<em>排行榜</em>
 	</p>
 </p>
-<p align="center">
+<p >
 	<img src="imgs/detail.jpg"   width="30%" height="30%">
 	<p align="center">
 		<em>书籍详情</em>
 	</p>
 </p>
+</div>
+
 <p align="center">
 	<img src="imgs/read.jpg"   width="30%" height="30%">
 	<p align="center">
