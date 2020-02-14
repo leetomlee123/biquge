@@ -7,24 +7,24 @@
 视图
 <div style="float: left">
 
-<p>
+<div>
 	<img src="imgs/shelf.jpg"   width="30%" height="30%">
 	<p align="center">
 		<em>书架</em>
 	</p>
-</p>
-<p >
+</div>
+<div >
 	<img src="imgs/top.jpg"   width="30%" height="30%">
 	<p align="center">
 		<em>排行榜</em>
 	</p>
-</p>
-<p >
+</div>
+<div >
 	<img src="imgs/detail.jpg"   width="30%" height="30%">
 	<p align="center">
 		<em>书籍详情</em>
 	</p>
-</p>
+</div>
 </div>
 
 <p align="center">
