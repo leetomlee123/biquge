@@ -8,7 +8,7 @@
 <div style="float: left">
 
 <div>
-	<img src="imgs/shelf.jpg"   width="30%" height="30%">
+	<img src="imgs/shelf.jpg"   width="10%" height="10%">
 	<p align="center">
 		<em>书架</em>
 	</p>
