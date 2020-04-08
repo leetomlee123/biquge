@@ -1,3 +1,5 @@
+停止维护
+[新开项目](https://github.com/leetomlee123/purebook)
 # 笔趣阁
 基于flutter的小说阅读app
 
